@@ -1,0 +1,30 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.local.yaml
+# Datasets and generated experiment outputs
+datasets/
+hf_datasets/
+artifacts/
+results/
+outputs/
+runs/
+reports/
+scores/
+logs/
+*.log
+# Model assets
+*.rkllm
+*.gguf
+*.safetensors
+*.bin
+# Build and Python caches
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.DS_Store

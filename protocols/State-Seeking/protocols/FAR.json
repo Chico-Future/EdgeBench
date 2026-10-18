@@ -1,0 +1,316 @@
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "get_home_overview"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "list_rooms"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "get_room_state"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "room_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "room_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "list_devices"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "room_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "device_type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "spec_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "get_device_state"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "device_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "device_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "get_device_spec"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "device_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "device_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "create_automation"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "conditions": {
+                  "type": "object",
+                  "properties": {
+                    "time_cron": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "state_expr": {
+                      "type": [
+                        "string",
+                        "null",
+                        "object"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "time_cron",
+                    "state_expr"
+                  ],
+                  "additionalProperties": false
+                },
+                "actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "device_id": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "service": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "arguments": {
+                        "type": "object"
+                      }
+                    },
+                    "required": [
+                      "device_id",
+                      "service",
+                      "arguments"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "minItems": 1
+                },
+                "automation_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "conditions",
+                "actions"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "final_output": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "const": "completed"
+            }
+          },
+          "required": [
+            "mode"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "final_output"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

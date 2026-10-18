@@ -1,0 +1,2 @@
+# Install a CUDA/PyTorch-compatible vLLM build separately on the server.
+-r requirements-cloud.txt

@@ -1,0 +1,24 @@
+{
+  "id": "home",
+  "name": "EdgeBench-Home",
+  "dataset": "chico-research/EdgeBench-Home",
+  "languages": [
+    "en",
+    "zh"
+  ],
+  "interfaces": [
+    "State-Given",
+    "State-Seeking"
+  ],
+  "task_families": [
+    "DGC",
+    "MSC",
+    "AIR",
+    "FAR",
+    "DCR",
+    "PMU",
+    "REQ"
+  ],
+  "runner": "cloud",
+  "scorer": "scoring.unified_scorer"
+}

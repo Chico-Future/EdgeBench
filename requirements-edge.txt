@@ -1,0 +1,2 @@
+# Install the matching aarch64 wheel on the RK3588 image; no transformers runtime is required.
+tokenizers==0.21.4

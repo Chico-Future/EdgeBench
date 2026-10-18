@@ -1,0 +1,22 @@
+# Optional catalog: replace the model ID and set the provider environment variables.
+version: 1
+provider:
+  name: openai_compatible
+  base_url_env: OPENAI_BASE_URL
+  api_key_env: OPENAI_API_KEY
+defaults:
+  enabled: false
+  temperature: 0.0
+  request_timeout: 900
+  max_tokens_field: max_tokens
+  max_context_len: 16384
+  max_new_tokens:
+    State-Given: 1024
+    State-Seeking: 512
+  supported_profiles:
+    - P0_prompt_only
+  extra_body: {}
+models:
+  example:
+    model: REPLACE_WITH_MODEL_ID
+    enabled: false

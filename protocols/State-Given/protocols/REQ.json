@@ -1,0 +1,212 @@
+{
+  "type": "object",
+  "properties": {
+    "mode": {
+      "const": "answer"
+    },
+    "result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "answer_type": {
+              "const": "count"
+            },
+            "value": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "answer_type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "answer_type": {
+              "const": "device_list"
+            },
+            "device_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "answer_type",
+            "device_ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "answer_type": {
+              "const": "status"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "device_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "facts": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "device_id",
+                  "facts"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "answer_type",
+            "items"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "answer_type": {
+              "const": "locations"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "device_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "room_name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "placement": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "device_id",
+                  "room_name",
+                  "placement"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "answer_type",
+            "items"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "answer_type": {
+              "const": "comparison"
+            },
+            "metric": {
+              "type": "string",
+              "minLength": 1
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "device_id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "value": {}
+                },
+                "required": [
+                  "device_id",
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "relation": {
+              "enum": [
+                "first_greater",
+                "second_greater",
+                "equal"
+              ]
+            },
+            "winner_device_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "answer_type",
+            "metric",
+            "values",
+            "relation",
+            "winner_device_ids"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "answer_type": {
+              "const": "extremum"
+            },
+            "metric": {
+              "type": "string",
+              "minLength": 1
+            },
+            "direction": {
+              "enum": [
+                "max",
+                "min"
+              ]
+            },
+            "value": {},
+            "device_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "required": [
+            "answer_type",
+            "metric",
+            "direction",
+            "value",
+            "device_ids"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "required": [
+    "mode",
+    "result"
+  ],
+  "additionalProperties": false
+}

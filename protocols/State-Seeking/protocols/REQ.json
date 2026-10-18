@@ -1,0 +1,427 @@
+{
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "get_home_overview"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "list_rooms"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "get_room_state"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "room_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "room_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "list_devices"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "room_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "device_type": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "spec_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "get_device_state"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "device_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "device_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tool_call": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "const": "get_device_spec"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "device_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "device_id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "arguments"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "tool_call"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "final_output": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "const": "answer"
+            },
+            "result": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "answer_type": {
+                      "const": "count"
+                    },
+                    "value": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "answer_type",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "answer_type": {
+                      "const": "device_list"
+                    },
+                    "device_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "required": [
+                    "answer_type",
+                    "device_ids"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "answer_type": {
+                      "const": "status"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "device_id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "facts": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        },
+                        "required": [
+                          "device_id",
+                          "facts"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "answer_type",
+                    "items"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "answer_type": {
+                      "const": "locations"
+                    },
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "device_id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "room_name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "placement": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "device_id",
+                          "room_name",
+                          "placement"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "answer_type",
+                    "items"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "answer_type": {
+                      "const": "comparison"
+                    },
+                    "metric": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "values": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "device_id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "value": {}
+                        },
+                        "required": [
+                          "device_id",
+                          "value"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "relation": {
+                      "enum": [
+                        "first_greater",
+                        "second_greater",
+                        "equal"
+                      ]
+                    },
+                    "winner_device_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "required": [
+                    "answer_type",
+                    "metric",
+                    "values",
+                    "relation",
+                    "winner_device_ids"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "answer_type": {
+                      "const": "extremum"
+                    },
+                    "metric": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "direction": {
+                      "enum": [
+                        "max",
+                        "min"
+                      ]
+                    },
+                    "value": {},
+                    "device_ids": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  },
+                  "required": [
+                    "answer_type",
+                    "metric",
+                    "direction",
+                    "value",
+                    "device_ids"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "required": [
+            "mode",
+            "result"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "final_output"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

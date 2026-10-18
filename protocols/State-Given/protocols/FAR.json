@@ -1,0 +1,80 @@
+{
+  "type": "object",
+  "properties": {
+    "mode": {
+      "const": "automation"
+    },
+    "automations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "conditions": {
+            "type": "object",
+            "properties": {
+              "time_cron": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "state_expr": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [],
+            "additionalProperties": true
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "device_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "service": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "arguments": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "device_id",
+                "service",
+                "arguments"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1
+          },
+          "automation_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "conditions",
+          "actions"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "mode",
+    "automations"
+  ],
+  "additionalProperties": false
+}

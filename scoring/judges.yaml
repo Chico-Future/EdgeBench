@@ -1,0 +1,16 @@
+# Configure and enable this placeholder before use.
+version: 1
+default_judge: example_judge
+judges:
+  example_judge:
+    provider: example_provider
+    api_style: responses
+    base_url_env: JUDGE_BASE_URL
+    api_key_env: JUDGE_API_KEY
+    model: REPLACE_WITH_MODEL_ID
+    temperature: 0.0
+    max_output_tokens: 300
+    reasoning_effort: null
+    strict_schema: false
+    rolling_alias: false
+    enabled: false

@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "properties": {
+    "mode": {
+      "const": "execution"
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "service": {
+            "type": "string",
+            "minLength": 1
+          },
+          "arguments": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "device_id",
+          "service",
+          "arguments"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "mode",
+    "actions"
+  ],
+  "additionalProperties": false
+}
