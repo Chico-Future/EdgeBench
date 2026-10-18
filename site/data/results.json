@@ -14,7 +14,8 @@
       "english_ss": 0.0,
       "sg": 0.0,
       "ss": 0.0,
-      "overall": 0.0
+      "overall": 0.0,
+      "class": "local"
     },
     {
       "model": "Qwen2.5-0.5B",
@@ -28,7 +29,8 @@
       "english_ss": 0.0,
       "sg": 0.0,
       "ss": 0.0,
-      "overall": 0.0
+      "overall": 0.0,
+      "class": "local"
     },
     {
       "model": "Qwen3-0.6B",
@@ -42,7 +44,8 @@
       "english_ss": 0.0,
       "sg": 0.0,
       "ss": 0.0,
-      "overall": 0.0
+      "overall": 0.0,
+      "class": "local"
     },
     {
       "model": "Qwen3.5-0.8B",
@@ -56,7 +59,8 @@
       "english_ss": 0.0,
       "sg": 2.4,
       "ss": 0.0,
-      "overall": 1.2
+      "overall": 1.2,
+      "class": "local"
     },
     {
       "model": "Qwen3.5-0.8B-16K",
@@ -70,7 +74,8 @@
       "english_ss": 0.0,
       "sg": 1.9,
       "ss": 0.0,
-      "overall": 0.9
+      "overall": 0.9,
+      "class": "local"
     },
     {
       "model": "MiniCPM-1B-SFT",
@@ -84,7 +89,8 @@
       "english_ss": 0.0,
       "sg": 0.0,
       "ss": 0.0,
-      "overall": 0.0
+      "overall": 0.0,
+      "class": "local"
     },
     {
       "model": "MiniCPM-S-1B-SFT",
@@ -98,7 +104,8 @@
       "english_ss": 0.0,
       "sg": 0.0,
       "ss": 0.0,
-      "overall": 0.0
+      "overall": 0.0,
+      "class": "local"
     },
     {
       "model": "LFM2.5-1.2B-Instruct",
@@ -112,7 +119,8 @@
       "english_ss": 0.0,
       "sg": 0.0,
       "ss": 0.1,
-      "overall": 0.1
+      "overall": 0.1,
+      "class": "local"
     },
     {
       "model": "DeepSeek-R1-Distill-Qwen-1.5B",
@@ -126,7 +134,8 @@
       "english_ss": 0.0,
       "sg": 0.0,
       "ss": 0.0,
-      "overall": 0.0
+      "overall": 0.0,
+      "class": "local"
     },
     {
       "model": "Qwen2.5-1.5B-Instruct",
@@ -140,7 +149,8 @@
       "english_ss": 0.0,
       "sg": 3.9,
       "ss": 0.0,
-      "overall": 1.9
+      "overall": 1.9,
+      "class": "local"
     },
     {
       "model": "Qwen3-1.7B",
@@ -154,7 +164,8 @@
       "english_ss": 1.4,
       "sg": 15.9,
       "ss": 3.7,
-      "overall": 9.8
+      "overall": 9.8,
+      "class": "local"
     },
     {
       "model": "Qwen3-1.7B-16K",
@@ -168,7 +179,8 @@
       "english_ss": 1.0,
       "sg": 15.1,
       "ss": 3.2,
-      "overall": 9.2
+      "overall": 9.2,
+      "class": "local"
     },
     {
       "model": "MiniCPM-2B-DPO",
@@ -182,7 +194,8 @@
       "english_ss": 0.0,
       "sg": 0.0,
       "ss": 0.0,
-      "overall": 0.0
+      "overall": 0.0,
+      "class": "local"
     },
     {
       "model": "MiniCPM5-2B",
@@ -196,7 +209,8 @@
       "english_ss": 0.0,
       "sg": 8.8,
       "ss": 3.7,
-      "overall": 6.2
+      "overall": 6.2,
+      "class": "local"
     },
     {
       "model": "Qwen3.5-2B",
@@ -210,7 +224,8 @@
       "english_ss": 7.9,
       "sg": 20.5,
       "ss": 4.0,
-      "overall": 12.2
+      "overall": 12.2,
+      "class": "local"
     },
     {
       "model": "Qwen2.5-3B-Instruct",
@@ -224,7 +239,8 @@
       "english_ss": 2.6,
       "sg": 16.8,
       "ss": 2.8,
-      "overall": 9.8
+      "overall": 9.8,
+      "class": "local"
     },
     {
       "model": "MiniCPM3-4B",
@@ -238,7 +254,8 @@
       "english_ss": 11.9,
       "sg": 14.5,
       "ss": 9.7,
-      "overall": 12.1
+      "overall": 12.1,
+      "class": "local"
     },
     {
       "model": "Qwen2.5-7B-Instruct",
@@ -252,7 +269,8 @@
       "english_ss": 10.0,
       "sg": 30.0,
       "ss": 8.0,
-      "overall": 19.0
+      "overall": 19.0,
+      "class": "local"
     },
     {
       "model": "GLM-5.2",
@@ -266,7 +284,8 @@
       "english_ss": 55.5,
       "sg": 77.0,
       "ss": 69.0,
-      "overall": 73.0
+      "overall": 73.0,
+      "class": "baseline"
     },
     {
       "model": "MiMo-V2.5-Pro",
@@ -280,7 +299,8 @@
       "english_ss": 53.8,
       "sg": 71.3,
       "ss": 67.2,
-      "overall": 69.2
+      "overall": 69.2,
+      "class": "baseline"
     },
     {
       "model": "MiniMax-M3",
@@ -294,7 +314,8 @@
       "english_ss": 51.4,
       "sg": 62.3,
       "ss": 60.3,
-      "overall": 61.3
+      "overall": 61.3,
+      "class": "baseline"
     },
     {
       "model": "Qwen3.8-Flash",
@@ -308,7 +329,37 @@
       "english_ss": 56.4,
       "sg": 69.5,
       "ss": 69.2,
-      "overall": 69.3
+      "overall": 69.3,
+      "class": "baseline"
     }
-  ]
+  ],
+  "size_band_summary": [
+    {
+      "label": "≤1B",
+      "models": 7,
+      "state_given_mean": 0.6,
+      "state_seeking_mean": 0.0,
+      "n_language_cases": 420
+    },
+    {
+      "label": "1–3B",
+      "models": 9,
+      "state_given_mean": 9.0,
+      "state_seeking_mean": 1.9,
+      "n_language_cases": 420
+    },
+    {
+      "label": "3–7B",
+      "models": 2,
+      "state_given_mean": 22.2,
+      "state_seeking_mean": 8.8,
+      "n_language_cases": 420
+    }
+  ],
+  "methodology": {
+    "metric": "strict micro-success",
+    "language_aggregation": "mean of English and Chinese tracks",
+    "cases_per_language": 420,
+    "model_pool": "18 local models and 4 server-hosted reference baselines"
+  }
 }
