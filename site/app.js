@@ -85,9 +85,196 @@ fetch('data/results.json')
     console.error(error);
   });
 
-document.querySelectorAll('.task-row').forEach((row) => {
-  row.addEventListener('click', () => {
-    document.querySelectorAll('.task-row').forEach((item) => item.classList.remove('selected'));
-    row.classList.add('selected');
+const taskData = {
+  DGC: {
+    title: 'Device Grounding and Control',
+    prompt: 'Turn on the desk lamp beside the monitor.',
+    caption: 'ROOM / DEVICE STATE',
+    success: 'Identify the intended device, apply one valid control, and leave unrelated devices unchanged.',
+    steps: [
+      ['01', 'Ground the reference', 'Resolve “desk lamp” to the correct device among similar candidates.'],
+      ['02', 'Apply one control', 'Execute the requested service with valid parameters.'],
+      ['03', 'Preserve other state', 'The target changes; the ceiling lamp and fan remain unchanged.']
+    ],
+    scenes: [
+      '<div class="scene-device"><span>◌</span><small>DESK LAMP</small></div><div class="scene-device"><span>◉</span><small>CEILING LAMP</small></div><div class="scene-device"><span>⌁</span><small>FAN</small></div>',
+      '<div class="scene-device target"><span class="pulse"></span><span>◌</span><small>DESK LAMP / ON</small></div><div class="scene-device"><span>◉</span><small>CEILING LAMP</small></div><div class="scene-device"><span>⌁</span><small>FAN</small></div>',
+      '<div class="scene-device changed"><span>◌</span><small>DESK LAMP / ON</small></div><div class="scene-device muted"><span>◉</span><small>CEILING LAMP</small></div><div class="scene-device muted"><span>⌁</span><small>FAN</small></div>'
+    ]
+  },
+  MSC: {
+    title: 'Multi-device Selection and Control',
+    prompt: 'Turn on the lights in occupied rooms, but leave the fans alone.',
+    caption: 'MULTI-DEVICE STATE',
+    success: 'Select the complete requested set, control every target, and avoid adding non-target devices.',
+    steps: [
+      ['01', 'Select the target set', 'Use the room and state rules to identify all occupied-room lights.'],
+      ['02', 'Coordinate actions', 'Apply the same intent across the selected devices.'],
+      ['03', 'Exclude non-targets', 'Fans and lights in empty rooms remain unchanged.']
+    ],
+    scenes: [
+      '<div class="scene-device"><span>◉</span><small>LIVING / ON</small></div><div class="scene-device"><span>◌</span><small>BEDROOM / OFF</small></div><div class="scene-device muted"><span>⌁</span><small>FAN / OFF</small></div>',
+      '<div class="scene-device target"><span class="pulse"></span><span>◉</span><small>LIVING / ON</small></div><div class="scene-device target"><span class="pulse"></span><span>◌</span><small>BEDROOM / ON</small></div><div class="scene-device muted"><span>⌁</span><small>FAN / OFF</small></div>',
+      '<div class="scene-device changed"><span>◉</span><small>LIVING / ON</small></div><div class="scene-device changed"><span>◌</span><small>BEDROOM / ON</small></div><div class="scene-device muted"><span>⌁</span><small>FAN / OFF</small></div>'
+    ]
+  },
+  AIR: {
+    title: 'Ambiguity and Intent Resolution',
+    prompt: 'Make it comfortable in here.',
+    caption: 'REQUEST / EVIDENCE',
+    success: 'Recognize when the available evidence is insufficient, ask for the missing slot, and do not act on a guess.',
+    steps: [
+      ['01', 'Check the evidence', 'The request does not identify a room or a specific comfort action.'],
+      ['02', 'Ask one useful question', 'Request the missing information that makes the next action executable.'],
+      ['03', 'Do not act yet', 'No device changes before the ambiguity is resolved.']
+    ],
+    scenes: [
+      '<div class="scene-device dialogue"><span>“Make it comfortable in here.”</span><small>UNDER-SPECIFIED REQUEST</small></div>',
+      '<div class="scene-device target"><span class="pulse"></span><span>Which room should I adjust?</span><small>CLARIFICATION</small></div>',
+      '<div class="scene-device muted"><span>◌</span><small>NO ACTION</small></div><div class="scene-device muted"><span>◉</span><small>NO ACTION</small></div><div class="scene-device muted"><span>⌁</span><small>NO ACTION</small></div>'
+    ]
+  },
+  FAR: {
+    title: 'Future Automation Registration',
+    prompt: 'Every weekday at 7:00, turn on the kitchen light.',
+    caption: 'CURRENT STATE / FUTURE RULE',
+    success: 'Register the requested time rule while leaving the current device state unchanged.',
+    steps: [
+      ['01', 'Parse the condition', 'Separate the future schedule from the action it will trigger.'],
+      ['02', 'Register the rule', 'Store the weekday and time condition with the kitchen-light action.'],
+      ['03', 'Leave now unchanged', 'The kitchen light does not turn on during registration.']
+    ],
+    scenes: [
+      '<div class="scene-device"><span>◌</span><small>KITCHEN / OFF</small></div><div class="scene-device"><span>◷</span><small>NOW</small></div>',
+      '<div class="scene-device rule"><span>MON–FRI · 07:00 → LIGHT ON</span><small>REGISTERED RULE</small></div>',
+      '<div class="scene-device muted"><span>◌</span><small>KITCHEN / STILL OFF</small></div><div class="scene-device changed"><span>✓</span><small>RULE SAVED</small></div>'
+    ]
+  },
+  DCR: {
+    title: 'Dialogue-context Resolution',
+    prompt: 'User: Turn on the lamp.  User: Actually, the bedroom one.',
+    caption: 'DIALOGUE / CURRENT TURN',
+    success: 'Use prior dialogue to resolve the correction, execute only the current request, and avoid replaying history.',
+    steps: [
+      ['01', 'Read the dialogue', 'The first turn names a lamp; the second turn corrects its location.'],
+      ['02', 'Resolve the correction', 'Use “actually” and “bedroom” to update the current target.'],
+      ['03', 'Execute once', 'Control the bedroom lamp without repeating an earlier action.']
+    ],
+    scenes: [
+      '<div class="scene-device dialogue"><span>“Actually, the bedroom one.”</span><small>CURRENT TURN</small></div>',
+      '<div class="scene-device"><span>◌</span><small>DESK / IGNORED</small></div><div class="scene-device target"><span class="pulse"></span><span>◌</span><small>BEDROOM / TARGET</small></div>',
+      '<div class="scene-device muted"><span>◌</span><small>DESK / UNCHANGED</small></div><div class="scene-device changed"><span>◌</span><small>BEDROOM / ON</small></div>'
+    ]
+  },
+  PMU: {
+    title: 'Personalized Memory Use',
+    prompt: 'Set the living-room lights the way I prefer in the evening.',
+    caption: 'USER / VALID PREFERENCE',
+    success: 'Select the current user’s valid preference and apply it to the requested target without changing unrelated state.',
+    steps: [
+      ['01', 'Retrieve relevant memory', 'Find a preference that belongs to this user and context.'],
+      ['02', 'Check validity', 'Ignore superseded or unrelated preferences before acting.'],
+      ['03', 'Apply the preference', 'Set the living-room lights to the remembered evening level.']
+    ],
+    scenes: [
+      '<div class="scene-device memory"><span>Evening: warm, 40%</span><small>VALID MEMORY</small></div>',
+      '<div class="scene-device target"><span class="pulse"></span><span>40%</span><small>LIVING LIGHTS</small></div><div class="scene-device muted"><span>◉</span><small>OTHER ROOM</small></div>',
+      '<div class="scene-device changed"><span>40%</span><small>LIVING / WARM</small></div><div class="scene-device muted"><span>◉</span><small>OTHER / SAME</small></div>'
+    ]
+  },
+  REQ: {
+    title: 'Read-only Environment Queries',
+    prompt: 'How many lights are on right now?',
+    caption: 'OBSERVATION / NO MUTATION',
+    success: 'Inspect permitted state, return the correct structured answer, and make no device-control attempt.',
+    steps: [
+      ['01', 'Inspect allowed state', 'Read the current device statuses and identify lights.'],
+      ['02', 'Count the matches', 'Aggregate only the devices satisfying the query.'],
+      ['03', 'Return the answer', 'Report the count while preserving the environment exactly.']
+    ],
+    scenes: [
+      '<div class="scene-device query-target"><span>◉</span><small>ON</small></div><div class="scene-device muted"><span>◌</span><small>OFF</small></div><div class="scene-device query-target"><span>◉</span><small>ON</small></div>',
+      '<div class="scene-device target"><span class="pulse"></span><span>2</span><small>LIGHTS ON</small></div>',
+      '<div class="scene-device answer"><span><b>2</b> lights are on.</span><small>READ-ONLY ANSWER</small></div>'
+    ]
+  }
+};
+
+const taskRows = document.querySelectorAll('.task-row');
+const taskDemo = document.querySelector('.task-demo');
+const taskTitle = document.getElementById('task-demo-title');
+const taskPrompt = document.getElementById('task-prompt');
+const taskSuccess = document.getElementById('task-success-copy');
+const walkSteps = document.getElementById('walk-steps');
+const sceneItems = document.getElementById('scene-items');
+const sceneCaption = document.getElementById('scene-caption');
+const walkCounter = document.getElementById('walk-counter');
+const walkTitle = document.getElementById('walk-step-title');
+const walkCopy = document.getElementById('walk-step-copy');
+const walkToggle = document.getElementById('walk-toggle');
+let activeFamily = 'DGC';
+let activeStep = 0;
+let walkTimer;
+let walkPaused = false;
+
+function renderTask(family, resetStep = true) {
+  const task = taskData[family];
+  activeFamily = family;
+  if (resetStep) activeStep = 0;
+  taskRows.forEach((row) => {
+    const selected = row.dataset.family === family;
+    row.classList.toggle('selected', selected);
+    row.setAttribute('aria-pressed', String(selected));
   });
+  taskDemo.classList.remove('switching');
+  void taskDemo.offsetWidth;
+  taskDemo.classList.add('switching');
+  taskTitle.textContent = task.title;
+  taskPrompt.textContent = task.prompt;
+  taskSuccess.textContent = task.success;
+  sceneCaption.textContent = task.caption;
+  walkSteps.replaceChildren();
+  task.steps.forEach((step, index) => {
+    const marker = document.createElement('span');
+    marker.className = 'walk-step';
+    marker.dataset.step = index;
+    marker.setAttribute('aria-label', `Step ${index + 1}: ${step[1]}`);
+    walkSteps.appendChild(marker);
+  });
+  updateTaskStep();
+  restartWalk();
+}
+
+function updateTaskStep() {
+  const task = taskData[activeFamily];
+  const step = task.steps[activeStep];
+  walkSteps.querySelectorAll('.walk-step').forEach((marker, index) => {
+    marker.classList.toggle('done', index < activeStep);
+    marker.classList.toggle('current', index === activeStep && !walkPaused);
+  });
+  sceneItems.innerHTML = task.scenes[activeStep];
+  walkCounter.textContent = `STEP ${step[0]} / ${task.steps.length}`;
+  walkTitle.textContent = step[1];
+  walkCopy.textContent = step[2];
+}
+
+function restartWalk() {
+  window.clearInterval(walkTimer);
+  if (walkPaused) return;
+  walkTimer = window.setInterval(() => {
+    activeStep = (activeStep + 1) % taskData[activeFamily].steps.length;
+    updateTaskStep();
+  }, 3600);
+}
+
+taskRows.forEach((row) => {
+  row.addEventListener('click', () => renderTask(row.dataset.family));
 });
+walkToggle.addEventListener('click', () => {
+  walkPaused = !walkPaused;
+  walkToggle.setAttribute('aria-pressed', String(!walkPaused));
+  walkToggle.textContent = walkPaused ? 'Play animation' : 'Pause animation';
+  updateTaskStep();
+  restartWalk();
+});
+renderTask('DGC');
