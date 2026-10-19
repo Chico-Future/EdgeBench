@@ -472,17 +472,17 @@ footer nav { gap: 16px; font-size: 11px; }
 }
 
 /* Readability pass: enlarge content and controls while keeping display headings restrained. */
-body { font-size: 15px; line-height: 1.52; }
+body { font-size: 16px; line-height: 1.52; }
 .brand { font-size: 15px; }
 nav { font-size: 13px; }
-.eyebrow, .section-label, .panel-top, .table-head, .source-note, .card-label { font-size: 11px; }
-.hero-copy { font-size: 17px; }
-.hero-note { font-size: 13px; }
+.eyebrow, .section-label, .panel-top, .table-head, .source-note, .card-label { font-size: 12px; }
+.hero-copy { font-size: 18px; }
+.hero-note { font-size: 14px; }
 .facts > div { min-height: 76px; padding: 16px 18px; }
 .facts b { font-size: 24px; }
-.facts span { font-size: 12px; }
-.lead { font-size: 16px; }
-.section-head p { font-size: 14px; }
+.facts span { font-size: 13px; }
+.lead { font-size: 17px; }
+.section-head p { font-size: 15px; }
 .release-head { font-size: 11px; }
 .release-head b { font-size: 13px; }
 .release dt, .release dd { font-size: 12px; }
@@ -490,21 +490,21 @@ nav { font-size: 13px; }
 .button.small { min-height: 36px; padding: 8px 12px; font-size: 12px; }
 .link { font-size: 13px; }
 .trend-panel, .model-landscape, .analysis-panel { padding: 20px 20px 18px; }
-.legend { font-size: 12px; }
+.legend { font-size: 13px; }
 .legend i { width: 15px; height: 4px; }
 .chart { height: 258px; margin-top: 20px; }
-.axis { font-size: 10px; }
+.axis { font-size: 11px; }
 .group { width: 112px; gap: 6px; padding-bottom: 30px; }
 .bar { width: 21px; }
-.group label { font-size: 11px; }
-.group label small { font-size: 10px; }
-.chart-caption, .table-note { font-size: 12px; }
+.group label { font-size: 12px; }
+.group label small { font-size: 11px; }
+.chart-caption, .table-note { font-size: 13px; }
 .results-table-wrap { margin-top: 18px; }
 .table-head { padding: 16px 19px; }
-.filter { padding: 7px 11px; font-size: 11px; }
-.results-table { font-size: 12px; }
-.results-table th { padding: 12px 19px; font-size: 10px; }
-.results-table td { padding: 12px 19px; }
+.filter { padding: 8px 12px; font-size: 12px; }
+.results-table { font-size: 13px; }
+.results-table th { padding: 13px 19px; font-size: 11px; }
+.results-table td { padding: 13px 19px; }
 .rank { width: 31px; font-size: 10px; }
 .table-note { padding: 0 19px 17px; }
 
@@ -512,15 +512,15 @@ nav { font-size: 13px; }
 .task-hint, .demo-eyebrow, .scene-bar, .task-success > span { font-size: 10px; }
 .task-row { min-height: 72px; padding: 14px 17px; }
 .task-code { font-size: 11px; }
-.task-info strong { font-size: 13px; }
-.task-info small { font-size: 11px; }
+.task-info strong { font-size: 14px; }
+.task-info small { font-size: 12px; }
 .task-arrow { font-size: 14px; }
 .demo-head { padding: 19px 20px 16px; }
 .demo-head h3 { font-size: 21px; }
 .walk-toggle { padding: 7px 10px; font-size: 11px; }
 .demo-prompt { padding: 15px 20px 14px; }
-.demo-prompt span { font-size: 10px; }
-.demo-prompt p { font-size: 14px; }
+.demo-prompt span { font-size: 11px; }
+.demo-prompt p { font-size: 15px; }
 .walk-steps { padding: 15px 20px 0; }
 .scene-canvas { margin: 16px 20px 0; min-height: 166px; }
 .scene-bar { padding: 10px 12px; }
@@ -530,63 +530,63 @@ nav { font-size: 13px; }
 .walk-copy { grid-template-columns: 155px 1fr; gap: 22px; padding: 16px 20px 17px; }
 .walk-counter { font-size: 11px; }
 .walk-copy h4 { font-size: 14px; }
-.walk-copy p { font-size: 12px; }
+.walk-copy p { font-size: 13px; }
 .task-success { grid-template-columns: 155px 1fr; gap: 22px; padding: 14px 20px; }
-.task-success p { font-size: 12px; }
+.task-success p { font-size: 13px; }
 
 .band-summary { gap: 10px; margin-top: 12px; }
 .band-card { padding: 17px; }
 .band-card-head b { font-size: 16px; }
-.band-card-head small { font-size: 10px; }
+.band-card-head small { font-size: 11px; }
 .band-bars { gap: 10px; margin-top: 19px; }
 .band-bars > span { grid-template-columns: 23px 1fr 43px; gap: 8px; }
-.band-bars i { font-size: 9px; }
+.band-bars i { font-size: 10px; }
 .band-bars em { height: 7px; }
-.band-bars strong { font-size: 10px; }
-.band-gap { margin-top: 17px; padding-top: 10px; font-size: 10px; }
+.band-bars strong { font-size: 11px; }
+.band-gap { margin-top: 17px; padding-top: 10px; font-size: 11px; }
 
 .interface-view { padding: 16px 20px 0; }
-.interface-view-head, .interface-note { font-size: 10px; }
-.interface-button { padding: 7px 10px; font-size: 11px; }
+.interface-view-head, .interface-note { font-size: 11px; }
+.interface-button { padding: 8px 11px; font-size: 12px; }
 .process-scroll { padding: 17px 0 12px; }
 .process-track { min-width: 580px; }
 .process-node { min-height: 60px; padding: 8px 10px; }
 .process-node b { font-size: 9px; }
-.process-node strong { font-size: 11px; }
-.process-node small { font-size: 9px; }
+.process-node strong { font-size: 12px; }
+.process-node small { font-size: 10px; }
 .interface-note { padding: 5px 0 15px; }
 
 .landscape-controls { gap: 6px; }
-.landscape-metric, .analysis-toggle, .gap-filter { padding: 7px 10px; font-size: 11px; }
+.landscape-metric, .analysis-toggle, .gap-filter { padding: 8px 11px; font-size: 12px; }
 .landscape-layout { gap: 22px; margin-top: 18px; }
-.landscape-axis, .landscape-axis-label { font-size: 10px; }
-.landscape-tooltip { max-width: 240px; padding: 9px 11px; font-size: 11px; }
+.landscape-axis, .landscape-axis-label { font-size: 11px; }
+.landscape-tooltip { max-width: 240px; padding: 10px 12px; font-size: 12px; }
 .landscape-reading > span, .reference-mini > span { font-size: 10px; }
 .landscape-reading strong { margin-top: 13px; font-size: 15px; }
-.landscape-reading p { font-size: 12px; }
+.landscape-reading p { font-size: 13px; }
 .reference-mini { padding-top: 19px; }
 .reference-bars { gap: 8px; margin-top: 11px; }
 .reference-row { grid-template-columns: 82px 1fr 38px; gap: 7px; }
-.reference-row label { font-size: 10px; }
-.reference-row b { font-size: 10px; }
+.reference-row label { font-size: 11px; }
+.reference-row b { font-size: 11px; }
 
-.analysis-legend { gap: 7px; margin-top: 17px; font-size: 11px; }
+.analysis-legend { gap: 7px; margin-top: 17px; font-size: 12px; }
 .analysis-legend i { width: 10px; height: 10px; }
-.analysis-axis, .analysis-axis-label { font-size: 10px; }
-.analysis-value { font-size: 9px; }
+.analysis-axis, .analysis-axis-label { font-size: 11px; }
+.analysis-value { font-size: 10px; }
 .gap-chart-wrap { max-height: 500px; margin-top: 7px; }
-.gap-model-label { font-size: 10px; }
-.gap-value { font-size: 9px; }
+.gap-model-label { font-size: 11px; }
+.gap-value { font-size: 10px; }
 
 .task-map-panel { margin-bottom: 16px; padding: 20px 20px 0; }
-.task-map-note { font-size: 11px; }
+.task-map-note { font-size: 12px; }
 .task-map-scroll { padding: 20px 0 10px; }
 .task-node-code { font-size: 11px; }
 .task-node-name { font-size: 9px; }
 .task-map-readout { grid-template-columns: 160px minmax(155px, .5fr) 1fr; gap: 20px; padding: 14px 0 17px; }
-.task-map-readout > span { font-size: 10px; }
-.task-map-readout strong { font-size: 13px; }
-.task-map-readout p { font-size: 12px; }
+.task-map-readout > span { font-size: 11px; }
+.task-map-readout strong { font-size: 14px; }
+.task-map-readout p { font-size: 13px; }
 
 @media (max-width: 760px) {
   .hero-copy { font-size: 16px; }
