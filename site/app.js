@@ -1,5 +1,10 @@
 const tableBody = document.getElementById('model-rows');
 const filterButtons = document.querySelectorAll('.filter');
+const landscapeChart = document.getElementById('landscape-chart');
+const landscapeTooltip = document.getElementById('landscape-tooltip');
+const landscapeMetricButtons = document.querySelectorAll('.landscape-metric');
+let loadedModels = [];
+let landscapeMetric = 'sg';
 
 function percent(value) {
   return `${Number(value).toFixed(1)}%`;
@@ -59,6 +64,122 @@ function render(models, filter = 'all') {
   });
 }
 
+const svgNamespace = 'http://www.w3.org/2000/svg';
+
+function svgElement(name, attributes = {}, text = '') {
+  const element = document.createElementNS(svgNamespace, name);
+  Object.entries(attributes).forEach(([key, value]) => element.setAttribute(key, value));
+  if (text) element.textContent = text;
+  return element;
+}
+
+function numericSize(model) {
+  const value = Number.parseFloat(String(model.size || '').replace(/[^0-9.]/g, ''));
+  return Number.isFinite(value) ? value : null;
+}
+
+function hideLandscapeTooltip() {
+  if (landscapeTooltip) landscapeTooltip.hidden = true;
+}
+
+function showLandscapeTooltip(model, point) {
+  if (!landscapeTooltip || !landscapeChart) return;
+  landscapeTooltip.textContent = `${model.model} · ${model.size} · ${model.platform || '—'} · SG ${percent(model.sg)} · SS ${percent(model.ss)}`;
+  const wrap = landscapeChart.parentElement.getBoundingClientRect();
+  const target = point.getBoundingClientRect();
+  const left = Math.min(target.right - wrap.left + 8, wrap.width - 228);
+  const top = Math.max(target.top - wrap.top - 10, 8);
+  landscapeTooltip.style.left = `${Math.max(left, 8)}px`;
+  landscapeTooltip.style.top = `${top}px`;
+  landscapeTooltip.hidden = false;
+}
+
+function renderLandscape(models, metric = landscapeMetric) {
+  if (!landscapeChart) return;
+  const localModels = models.filter((model) => model.class === 'local' && numericSize(model) !== null);
+  const width = 760;
+  const height = 276;
+  const plot = { left: 48, right: 18, top: 18, bottom: 42 };
+  const plotWidth = width - plot.left - plot.right;
+  const plotHeight = height - plot.top - plot.bottom;
+  const xMin = 0.35;
+  const xMax = 7.15;
+  const yMax = 30;
+  const x = (value) => plot.left + ((value - xMin) / (xMax - xMin)) * plotWidth;
+  const y = (value) => plot.top + (1 - Math.min(Number(value) || 0, yMax) / yMax) * plotHeight;
+
+  landscapeChart.replaceChildren();
+  landscapeChart.appendChild(svgElement('title', { id: 'landscape-title' }, 'Local model success by parameter count'));
+  landscapeChart.appendChild(svgElement('desc', { id: 'landscape-desc' }, 'Each point represents one evaluated local model. Horizontal position shows parameter count and vertical position shows strict micro-success.'));
+
+  const grid = svgElement('g');
+  [0, 10, 20, 30].forEach((tick) => {
+    const tickY = y(tick);
+    grid.appendChild(svgElement('line', { class: 'landscape-gridline', x1: plot.left, x2: width - plot.right, y1: tickY, y2: tickY }));
+    grid.appendChild(svgElement('text', { class: 'landscape-axis', x: plot.left - 9, y: tickY + 3, 'text-anchor': 'end' }, `${tick}%`));
+  });
+  [1, 3].forEach((boundary) => {
+    grid.appendChild(svgElement('line', { class: 'landscape-band-line', x1: x(boundary), x2: x(boundary), y1: plot.top, y2: height - plot.bottom }));
+  });
+  landscapeChart.appendChild(grid);
+
+  const xTicks = [0.5, 1, 2, 3, 4, 7];
+  const axis = svgElement('g');
+  xTicks.forEach((tick) => {
+    axis.appendChild(svgElement('text', { class: 'landscape-axis', x: x(tick), y: height - 21, 'text-anchor': 'middle' }, `${tick}B`));
+  });
+  axis.appendChild(svgElement('text', { class: 'landscape-axis-label', x: plot.left, y: height - 5 }, 'model size (parameters)'));
+  axis.appendChild(svgElement('text', { class: 'landscape-axis-label', x: plot.left, y: 10 }, `${metric === 'sg' ? 'State-Given' : 'State-Seeking'} strict success`));
+  landscapeChart.appendChild(axis);
+
+  const points = svgElement('g');
+  const topModel = [...localModels].sort((a, b) => Number(b[metric]) - Number(a[metric]))[0];
+  localModels.forEach((model) => {
+    const point = svgElement('circle', {
+      class: `landscape-point${model === topModel ? ' is-top' : ''}`,
+      cx: x(numericSize(model)),
+      cy: y(model[metric]),
+      r: model === topModel ? 5 : 4,
+      'data-band': model.band,
+      tabindex: '0',
+      role: 'button',
+      'aria-label': `${model.model}, ${model.size}, ${metric === 'sg' ? 'State-Given' : 'State-Seeking'} ${percent(model[metric])}`
+    });
+    point.addEventListener('mouseenter', () => showLandscapeTooltip(model, point));
+    point.addEventListener('focus', () => showLandscapeTooltip(model, point));
+    point.addEventListener('mouseleave', hideLandscapeTooltip);
+    point.addEventListener('blur', hideLandscapeTooltip);
+    points.appendChild(point);
+  });
+  landscapeChart.appendChild(points);
+
+  const referenceBars = document.getElementById('reference-bars');
+  if (referenceBars) {
+    referenceBars.replaceChildren();
+    models.filter((model) => model.class === 'baseline').sort((a, b) => Number(b[metric]) - Number(a[metric])).forEach((model) => {
+      const row = document.createElement('div');
+      row.className = 'reference-row';
+      const label = document.createElement('label');
+      label.textContent = model.model;
+      label.title = model.model;
+      const bar = document.createElement('i');
+      bar.style.width = `${Math.min(Number(model[metric]) / 80 * 100, 100)}%`;
+      const value = document.createElement('b');
+      value.textContent = percent(model[metric]);
+      row.append(label, bar, value);
+      referenceBars.appendChild(row);
+    });
+  }
+
+  const head = document.getElementById('landscape-head');
+  const copy = document.getElementById('landscape-copy');
+  if (head && copy && topModel) {
+    const metricName = metric === 'sg' ? 'State-Given' : 'State-Seeking';
+    head.textContent = `${topModel.model} leads local ${metricName} at ${percent(topModel[metric])}.`;
+    copy.textContent = `${localModels.length} local models are plotted by parameter count. The size bands make the upward trend visible while preserving each model-level result.`;
+  }
+}
+
 fetch('data/results.json')
   .then((response) => {
     if (!response.ok) throw new Error(`Could not load results: ${response.status}`);
@@ -66,7 +187,9 @@ fetch('data/results.json')
   })
   .then((data) => {
     const models = data.models || [];
+    loadedModels = models;
     render(models);
+    renderLandscape(models);
     filterButtons.forEach((button) => {
       button.addEventListener('click', () => {
         filterButtons.forEach((item) => item.classList.remove('active'));
@@ -212,6 +335,26 @@ const walkCounter = document.getElementById('walk-counter');
 const walkTitle = document.getElementById('walk-step-title');
 const walkCopy = document.getElementById('walk-step-copy');
 const walkToggle = document.getElementById('walk-toggle');
+const processTrack = document.querySelector('.process-track');
+const processNodes = document.querySelectorAll('.process-node');
+const interfaceButtons = document.querySelectorAll('.interface-button');
+const interfaceNote = document.getElementById('interface-note');
+const taskMapNodes = document.querySelectorAll('.task-map-node');
+const taskMapReadoutTitle = document.getElementById('task-map-readout-title');
+const taskMapReadoutCopy = document.getElementById('task-map-readout-copy');
+const taskStageMap = {
+  DGC: ['resolve', 'act', 'score'],
+  MSC: ['resolve', 'act', 'score'],
+  AIR: ['observe', 'act', 'score'],
+  FAR: ['resolve', 'act', 'score'],
+  DCR: ['observe', 'resolve', 'act'],
+  PMU: ['observe', 'resolve', 'act'],
+  REQ: ['observe', 'resolve', 'score']
+};
+const interfaceCopy = {
+  SG: 'State-Given supplies the relevant context before the model responds.',
+  SS: 'State-Seeking begins with partial observation and adds a query-and-act loop.'
+};
 let activeFamily = 'DGC';
 let activeStep = 0;
 let walkTimer;
@@ -233,6 +376,7 @@ function renderTask(family, resetStep = true) {
   taskPrompt.textContent = task.prompt;
   taskSuccess.textContent = task.success;
   sceneCaption.textContent = task.caption;
+  updateTaskMap();
   walkSteps.replaceChildren();
   task.steps.forEach((step, index) => {
     const marker = document.createElement('span');
@@ -256,6 +400,15 @@ function updateTaskStep() {
   walkCounter.textContent = `STEP ${step[0]} / ${task.steps.length}`;
   walkTitle.textContent = step[1];
   walkCopy.textContent = step[2];
+  const rawStage = taskStageMap[activeFamily][activeStep];
+  const activeStage = processTrack.dataset.interface === 'SG' && rawStage === 'observe' ? 'resolve' : rawStage;
+  processNodes.forEach((node) => {
+    const stage = node.dataset.stage;
+    const stageIndex = ['request', 'observe', 'resolve', 'act', 'score'].indexOf(stage);
+    const activeIndex = ['request', 'observe', 'resolve', 'act', 'score'].indexOf(activeStage);
+    node.classList.toggle('current', stage === activeStage);
+    node.classList.toggle('complete', stageIndex >= 0 && stageIndex < activeIndex);
+  });
 }
 
 function restartWalk() {
@@ -277,4 +430,53 @@ walkToggle.addEventListener('click', () => {
   updateTaskStep();
   restartWalk();
 });
+
+function setInterface(mode) {
+  processTrack.dataset.interface = mode;
+  interfaceButtons.forEach((button) => {
+    button.classList.toggle('active', button.dataset.interface === mode);
+  });
+  interfaceNote.textContent = interfaceCopy[mode];
+  updateTaskStep();
+}
+
+function updateTaskMap() {
+  const task = taskData[activeFamily];
+  taskMapNodes.forEach((node) => {
+    node.classList.toggle('selected', node.dataset.family === activeFamily);
+  });
+  if (taskMapReadoutTitle) taskMapReadoutTitle.textContent = `${activeFamily} · ${task.title}`;
+  if (taskMapReadoutCopy) taskMapReadoutCopy.textContent = task.steps[0][2];
+}
+
+interfaceButtons.forEach((button) => {
+  button.addEventListener('click', () => setInterface(button.dataset.interface));
+});
+
+landscapeMetricButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    landscapeMetric = button.dataset.landscapeMetric;
+    landscapeMetricButtons.forEach((item) => item.classList.toggle('active', item === button));
+    renderLandscape(loadedModels, landscapeMetric);
+  });
+});
+
+taskMapNodes.forEach((node) => {
+  node.addEventListener('click', () => renderTask(node.dataset.family));
+  node.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      renderTask(node.dataset.family);
+    }
+  });
+});
+
+document.querySelectorAll('.band-card').forEach((card) => {
+  card.addEventListener('click', () => {
+    const filter = [...filterButtons].find((button) => button.dataset.filter === card.dataset.bandFilter);
+    if (filter) filter.click();
+  });
+});
+
+setInterface('SG');
 renderTask('DGC');
