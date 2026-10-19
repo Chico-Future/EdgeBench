@@ -767,3 +767,92 @@ nav a:hover { background: transparent; color: var(--blue); }
   .trend-panel, .model-landscape, .analysis-panel, .task-map-panel, .results-table-wrap, .task-demo { border-radius: 12px; }
   .band-card, .band-card:nth-child(2), .band-card:nth-child(3) { min-height: 0; border-radius: 11px; }
 }
+
+/* Meaningful color mapping: each visual module gets one restrained accent. */
+.intro .section-label { color: #80c8ff; }
+.results .section-label { color: #c493ff; }
+.tasks .section-label { color: #ffad7e; }
+.reproduce .section-label { color: #e18bef; }
+.release { border-left: 2px solid #80c8ff; }
+
+.facts > div:nth-child(1) { border-top: 2px solid #80c8ff; }
+.facts > div:nth-child(2) { border-top: 2px solid #c493ff; }
+.facts > div:nth-child(3) { border-top: 2px solid #ffad7e; }
+.facts > div:nth-child(4) { border-top: 2px solid #e18bef; }
+
+.trend-panel {
+  border-top: 2px solid #c493ff;
+  background: linear-gradient(180deg, rgba(106, 76, 245, .16), var(--surface) 32%);
+}
+.model-landscape {
+  border-top: 2px solid #80c8ff;
+  background: linear-gradient(180deg, rgba(0, 153, 255, .12), var(--surface) 32%);
+}
+.analysis-grid .analysis-panel:first-child {
+  border-top: 2px solid #e18bef;
+  background: linear-gradient(180deg, rgba(212, 77, 240, .13), var(--surface) 35%);
+}
+.analysis-grid .analysis-panel.gap-panel {
+  border-top: 2px solid #ffad7e;
+  background: linear-gradient(180deg, rgba(255, 122, 61, .13), var(--surface) 35%);
+}
+.task-map-panel {
+  border-top: 2px solid #ffad7e;
+  background: linear-gradient(180deg, rgba(255, 122, 61, .13), var(--surface) 34%);
+}
+.task-demo {
+  border-top: 2px solid #e18bef;
+  background: linear-gradient(180deg, rgba(212, 77, 240, .13), var(--surface) 34%);
+}
+.band-card, .band-card:nth-child(2), .band-card:nth-child(3) { background: var(--surface); }
+.band-card:nth-child(1) { border-top: 2px solid #80c8ff; }
+.band-card:nth-child(2) { border-top: 2px solid #c493ff; }
+.band-card:nth-child(3) { border-top: 2px solid #ffad7e; }
+
+.bar.sg { background: #80c8ff; }
+.bar.ss { background: #d48bee; }
+.legend i { background: #80c8ff; }
+.legend i.gray { background: #d48bee; }
+.band-bars em { background: #80c8ff; }
+.band-bars em.ss { background: #d48bee; }
+.analysis-legend i.cn { background: #d48bee; }
+.analysis-legend i.en { background: #ffad7e; }
+.analysis-legend i.sg-dot, .gap-point.sg { background: #80c8ff; fill: #80c8ff; }
+.analysis-legend i.ss-dot, .gap-point.ss { background: #d48bee; fill: #d48bee; }
+.gap-span { stroke: #74627b; }
+.task-node-dot { fill: #656565; }
+.task-map-node.selected .task-node-ring { fill: rgba(0, 153, 255, .12); stroke: #80c8ff; }
+.task-map-node.selected .task-node-dot { fill: #80c8ff; }
+
+/* Component correction pass: keep color semantic and stateful. */
+.landscape-point { fill: #80c8ff; }
+.landscape-point.metric-ss { fill: #d48bee; }
+.landscape-point[data-band="≤1B"] { opacity: .62; }
+.landscape-point[data-band="1--3B"] { opacity: .82; }
+.landscape-point[data-band="3--7B"] { opacity: 1; }
+.reference-row i { background: #80c8ff; }
+.reference-row.metric-ss i { background: #d48bee; }
+.language-bar.chinese { fill: #d48bee; }
+.language-bar.english { fill: #ffad7e; }
+.task-map-node:not(.selected) .task-node-dot { fill: #656565; }
+.task-map-node:not(.selected):hover .task-node-dot,
+.task-map-node:not(.selected):focus .task-node-dot { fill: #a0a0a0; }
+
+.panel-top { min-height: 25px; }
+.landscape-controls, .analysis-controls, .filters { align-items: center; }
+.landscape-metric, .analysis-toggle, .gap-filter, .filter, .interface-button, .walk-toggle {
+  min-height: 30px;
+  line-height: 1;
+}
+.trend-panel, .model-landscape, .analysis-panel, .task-map-panel, .results-table-wrap, .task-demo, .release, .code {
+  overflow: hidden;
+}
+.task-map-scroll { min-height: 236px; display: flex; align-items: center; }
+.task-map-readout { min-height: 64px; }
+.results-table tbody tr.reference:first-of-type td { border-top: 1px solid #3a3150; }
+
+.landscape-metric.active, .analysis-toggle.active, .gap-filter.active, .interface-button.active, .filter.active {
+  color: #d8efff;
+  border-color: #80c8ff;
+  box-shadow: 0 0 0 2px rgba(0, 153, 255, .12);
+}

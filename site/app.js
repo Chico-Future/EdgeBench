@@ -145,7 +145,7 @@ function renderLandscape(models, metric = landscapeMetric) {
   const topModel = [...localModels].sort((a, b) => Number(b[metric]) - Number(a[metric]))[0];
   localModels.forEach((model) => {
     const point = svgElement('circle', {
-      class: `landscape-point${model === topModel ? ' is-top' : ''}`,
+      class: `landscape-point metric-${metric}${model === topModel ? ' is-top' : ''}`,
       cx: x(numericSize(model)),
       cy: y(model[metric]),
       r: model === topModel ? 5 : 4,
@@ -167,7 +167,7 @@ function renderLandscape(models, metric = landscapeMetric) {
     referenceBars.replaceChildren();
     models.filter((model) => model.class === 'baseline').sort((a, b) => Number(b[metric]) - Number(a[metric])).forEach((model) => {
       const row = document.createElement('div');
-      row.className = 'reference-row';
+      row.className = `reference-row metric-${metric}`;
       const label = document.createElement('label');
       label.textContent = model.model;
       label.title = model.model;
