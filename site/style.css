@@ -856,3 +856,95 @@ nav a:hover { background: transparent; color: var(--blue); }
   border-color: #80c8ff;
   box-shadow: 0 0 0 2px rgba(0, 153, 255, .12);
 }
+
+/* Atmospheric surfaces: use the DESIGN.md spotlight treatment instead of colored edge bars. */
+.release {
+  border-left: 1px solid var(--hair);
+  background:
+    radial-gradient(420px 180px at 100% 0%, rgba(0, 153, 255, .18), transparent 72%),
+    var(--surface);
+}
+.facts > div:nth-child(1), .facts > div:nth-child(2),
+.facts > div:nth-child(3), .facts > div:nth-child(4) {
+  border-top: 1px solid var(--hair);
+}
+.facts > div:nth-child(1) {
+  background: radial-gradient(240px 120px at 100% 0%, rgba(0, 153, 255, .16), transparent 76%), var(--surface);
+}
+.facts > div:nth-child(2) {
+  background: radial-gradient(240px 120px at 100% 0%, rgba(106, 76, 245, .18), transparent 76%), var(--surface);
+}
+.facts > div:nth-child(3) {
+  background: radial-gradient(240px 120px at 100% 0%, rgba(255, 122, 61, .15), transparent 76%), var(--surface);
+}
+.facts > div:nth-child(4) {
+  background: radial-gradient(240px 120px at 100% 0%, rgba(212, 77, 240, .16), transparent 76%), var(--surface);
+}
+.trend-panel, .model-landscape, .analysis-grid .analysis-panel:first-child,
+.analysis-grid .analysis-panel.gap-panel, .task-map-panel, .task-demo {
+  border-top: 1px solid var(--hair);
+}
+.trend-panel {
+  background: radial-gradient(620px 220px at 100% 0%, rgba(106, 76, 245, .22), transparent 72%), var(--surface);
+}
+.model-landscape {
+  background: radial-gradient(620px 220px at 100% 0%, rgba(0, 153, 255, .16), transparent 72%), var(--surface);
+}
+.analysis-grid .analysis-panel:first-child {
+  background: radial-gradient(420px 190px at 100% 0%, rgba(212, 77, 240, .18), transparent 72%), var(--surface);
+}
+.analysis-grid .analysis-panel.gap-panel {
+  background: radial-gradient(420px 190px at 100% 0%, rgba(255, 122, 61, .16), transparent 72%), var(--surface);
+}
+.task-map-panel {
+  background: radial-gradient(680px 240px at 100% 0%, rgba(255, 122, 61, .18), transparent 72%), var(--surface);
+}
+.task-demo {
+  background: radial-gradient(560px 250px at 100% 0%, rgba(212, 77, 240, .18), transparent 72%), var(--surface);
+}
+.band-card, .band-card:nth-child(1), .band-card:nth-child(2), .band-card:nth-child(3) {
+  border-top: 1px solid var(--hair);
+}
+.band-card:nth-child(1) {
+  background: radial-gradient(260px 150px at 100% 0%, rgba(0, 153, 255, .14), transparent 78%), var(--surface);
+}
+.band-card:nth-child(2) {
+  background: radial-gradient(260px 150px at 100% 0%, rgba(106, 76, 245, .16), transparent 78%), var(--surface);
+}
+.band-card:nth-child(3) {
+  background: radial-gradient(260px 150px at 100% 0%, rgba(255, 122, 61, .15), transparent 78%), var(--surface);
+}
+
+/* Model identity marks keep the leaderboard scannable without adding external assets. */
+.model-cell {
+  display: grid;
+  grid-template-columns: 31px 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+}
+.model-cell strong { overflow: hidden; text-overflow: ellipsis; }
+.model-logo {
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: 8px;
+  color: #090909;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -.04em;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .22);
+}
+.model-logo.qwen { background: linear-gradient(145deg, #ffc08c, #f36c54); }
+.model-logo.minicpm { background: linear-gradient(145deg, #e2b7ff, #9e70ff); }
+.model-logo.deepseek { background: linear-gradient(145deg, #a2d9ff, #5c8eff); }
+.model-logo.lfm { background: linear-gradient(145deg, #a4efd4, #48b28c); }
+.model-logo.glm { background: linear-gradient(145deg, #ffc0c0, #e46b75); }
+.model-logo.mimo { background: linear-gradient(145deg, #ffe2a0, #dfa14a); font-size: 9px; }
+.model-logo.minimax { background: linear-gradient(145deg, #ffc2e8, #d06ab4); font-size: 9px; }
+.model-logo.generic { background: linear-gradient(145deg, #d2d8e2, #7c8797); }
+.reference-row { grid-template-columns: 26px 82px 1fr 38px; }
+.reference-row .model-logo { width: 22px; height: 22px; border-radius: 7px; font-size: 9px; }
+.results-table tbody tr.reference:first-of-type td { border-top-color: var(--hair); }

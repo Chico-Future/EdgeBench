@@ -19,17 +19,40 @@ function percent(value) {
   return `${Number(value).toFixed(1)}%`;
 }
 
+function modelBrand(model) {
+  const name = String(model.model || '').toLowerCase();
+  if (name.startsWith('qwen')) return { key: 'qwen', mark: 'Q', label: 'Qwen' };
+  if (name.startsWith('minicpm')) return { key: 'minicpm', mark: 'M', label: 'MiniCPM' };
+  if (name.startsWith('deepseek')) return { key: 'deepseek', mark: 'D', label: 'DeepSeek' };
+  if (name.startsWith('lfm')) return { key: 'lfm', mark: 'L', label: 'Liquid AI' };
+  if (name.startsWith('glm')) return { key: 'glm', mark: 'G', label: 'GLM' };
+  if (name.startsWith('mimo')) return { key: 'mimo', mark: 'Mi', label: 'MiMo' };
+  if (name.startsWith('minimax')) return { key: 'minimax', mark: 'Mx', label: 'MiniMax' };
+  return { key: 'generic', mark: '·', label: 'Model' };
+}
+
+function modelLogo(model) {
+  const brand = modelBrand(model);
+  const logo = document.createElement('span');
+  logo.className = `model-logo ${brand.key}`;
+  logo.textContent = brand.mark;
+  logo.setAttribute('aria-hidden', 'true');
+  logo.title = brand.label;
+  return logo;
+}
+
 function modelRow(model, rank) {
   const row = document.createElement('tr');
   if (model.class === 'baseline') row.className = 'reference';
 
   const name = document.createElement('td');
+  name.className = 'model-cell';
   const rankLabel = document.createElement('span');
   rankLabel.className = 'rank';
   rankLabel.textContent = String(rank).padStart(2, '0');
   const modelName = document.createElement('strong');
   modelName.textContent = model.model;
-  name.append(rankLabel, modelName);
+  name.append(rankLabel, modelLogo(model), modelName);
 
   const cells = [
     model.size || '—',
@@ -168,6 +191,7 @@ function renderLandscape(models, metric = landscapeMetric) {
     models.filter((model) => model.class === 'baseline').sort((a, b) => Number(b[metric]) - Number(a[metric])).forEach((model) => {
       const row = document.createElement('div');
       row.className = `reference-row metric-${metric}`;
+      row.appendChild(modelLogo(model));
       const label = document.createElement('label');
       label.textContent = model.model;
       label.title = model.model;
