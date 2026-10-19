@@ -712,3 +712,58 @@ footer { padding-top: 48px; }
   .trend-panel, .model-landscape, .analysis-panel, .task-map-panel, .results-table-wrap, .task-demo { border-radius: 16px; }
   .band-card { min-height: 0; border-radius: 12px; }
 }
+
+/* Final simplification: one surface language, one accent, fewer visual distractions. */
+.hero::after { display: none; }
+nav a { padding: 0; border-radius: 0; }
+nav a:hover { background: transparent; color: var(--blue); }
+.section-label { color: var(--muted); }
+.facts { gap: 8px; border-bottom: 0; }
+.facts > div, .facts > div:last-child {
+  min-height: 84px;
+  padding: 19px 20px;
+  border: 1px solid var(--hair);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.facts > div:nth-child(2), .facts > div:nth-child(4) { background: var(--surface); }
+.release {
+  padding: 20px;
+  border: 1px solid var(--hair);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.trend-panel, .model-landscape, .analysis-panel, .task-map-panel, .results-table-wrap, .task-demo {
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: none;
+}
+.trend-panel, .model-landscape, .task-map-panel, .task-demo { background: var(--surface); }
+.table-head { background: transparent; }
+.band-card, .band-card:nth-child(2), .band-card:nth-child(3) {
+  min-height: 176px;
+  border-radius: 12px;
+  background: var(--surface);
+  transition: border-color .2s ease, background .2s ease;
+}
+.band-card:hover, .band-card:focus-visible { transform: none; border-color: #777; background: var(--surface-2); }
+.landscape-chart-wrap, .gap-chart-wrap { border-radius: 10px; }
+.landscape-metric, .analysis-toggle, .gap-filter, .interface-button, .walk-toggle, .filter {
+  background: transparent;
+  border-color: var(--hair);
+}
+.landscape-metric.active, .analysis-toggle.active, .gap-filter.active, .interface-button.active, .filter.active {
+  background: var(--surface-2);
+  border-color: var(--blue);
+}
+.task-list { border-radius: 14px; }
+.task-demo { border-radius: 14px; }
+.code { border-radius: 14px; }
+
+@media (max-width: 760px) {
+  .facts { gap: 7px; }
+  .facts > div, .facts > div:last-child { min-height: 78px; padding: 16px; border-radius: 11px; }
+  .release { padding: 17px; border-radius: 12px; }
+  .trend-panel, .model-landscape, .analysis-panel, .task-map-panel, .results-table-wrap, .task-demo { border-radius: 12px; }
+  .band-card, .band-card:nth-child(2), .band-card:nth-child(3) { min-height: 0; border-radius: 11px; }
+}
