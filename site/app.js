@@ -3,8 +3,17 @@ const filterButtons = document.querySelectorAll('.filter');
 const landscapeChart = document.getElementById('landscape-chart');
 const landscapeTooltip = document.getElementById('landscape-tooltip');
 const landscapeMetricButtons = document.querySelectorAll('.landscape-metric');
+const languageChart = document.getElementById('language-chart');
+const languageMetricButtons = document.querySelectorAll('.analysis-toggle');
+const languageCaption = document.getElementById('language-caption');
+const gapChart = document.getElementById('gap-chart');
+const gapTooltip = document.getElementById('gap-tooltip');
+const gapFilterButtons = document.querySelectorAll('.gap-filter');
 let loadedModels = [];
+let loadedBandSummary = [];
 let landscapeMetric = 'sg';
+let languageMetric = 'sg';
+let gapFilter = 'all';
 
 function percent(value) {
   return `${Number(value).toFixed(1)}%`;
@@ -180,6 +189,111 @@ function renderLandscape(models, metric = landscapeMetric) {
   }
 }
 
+function renderLanguageChart(summary, metric = languageMetric) {
+  if (!languageChart) return;
+  const width = 520;
+  const height = 258;
+  const plot = { left: 46, right: 18, top: 18, bottom: 38 };
+  const plotWidth = width - plot.left - plot.right;
+  const plotHeight = height - plot.top - plot.bottom;
+  const yMax = 25;
+  const y = (value) => plot.top + (1 - Math.min(Number(value) || 0, yMax) / yMax) * plotHeight;
+  const groupX = [125, 260, 395];
+  const languageKey = metric === 'sg' ? 'state_given_by_language' : 'state_seeking_by_language';
+  const metricName = metric === 'sg' ? 'State-Given' : 'State-Seeking';
+  languageChart.replaceChildren();
+  languageChart.appendChild(svgElement('title', { id: 'language-title' }, 'Chinese and English success by local model size'));
+  languageChart.appendChild(svgElement('desc', { id: 'language-desc' }, 'Grouped bars compare the Chinese and English tracks for each local model size band.'));
+  const grid = svgElement('g');
+  [0, 5, 10, 15, 20, 25].forEach((tick) => {
+    const tickY = y(tick);
+    grid.appendChild(svgElement('line', { class: 'analysis-gridline', x1: plot.left, x2: width - plot.right, y1: tickY, y2: tickY }));
+    grid.appendChild(svgElement('text', { class: 'analysis-axis', x: plot.left - 8, y: tickY + 3, 'text-anchor': 'end' }, `${tick}%`));
+  });
+  languageChart.appendChild(grid);
+  const bars = svgElement('g');
+  summary.forEach((band, index) => {
+    const values = band[languageKey] || {};
+    const chinese = Number(values.Chinese) || 0;
+    const english = Number(values.English) || 0;
+    const baseY = y(0);
+    const chineseX = groupX[index] - 20;
+    const englishX = groupX[index] + 4;
+    const chineseBar = svgElement('rect', { class: 'language-bar chinese', x: chineseX, y: y(chinese), width: 18, height: Math.max(baseY - y(chinese), chinese ? 1 : 0), rx: 2, tabindex: '0', role: 'img', 'aria-label': `${band.label} Chinese ${percent(chinese)}` });
+    const englishBar = svgElement('rect', { class: 'language-bar english', x: englishX, y: y(english), width: 18, height: Math.max(baseY - y(english), english ? 1 : 0), rx: 2, tabindex: '0', role: 'img', 'aria-label': `${band.label} English ${percent(english)}` });
+    bars.append(chineseBar, englishBar);
+    if (chinese > 0) bars.appendChild(svgElement('text', { class: 'analysis-value', x: chineseX + 9, y: y(chinese) - 6, 'text-anchor': 'middle' }, chinese.toFixed(1)));
+    if (english > 0) bars.appendChild(svgElement('text', { class: 'analysis-value', x: englishX + 9, y: y(english) - 6, 'text-anchor': 'middle' }, english.toFixed(1)));
+    bars.appendChild(svgElement('text', { class: 'analysis-axis-label', x: groupX[index], y: height - 16, 'text-anchor': 'middle' }, band.label));
+  });
+  languageChart.appendChild(bars);
+  languageChart.appendChild(svgElement('text', { class: 'analysis-axis-label', x: plot.left, y: 10 }, `${metricName} strict success`));
+  if (languageCaption) languageCaption.textContent = `Chinese and English means are shown separately for ${metricName}.`;
+}
+
+function shortModelName(name) {
+  return name.replace(/-Instruct|-SFT|-DPO/g, '').replace('DeepSeek-R1-Distill-', 'DS-R1-').slice(0, 24);
+}
+
+function showGapTooltip(model, point) {
+  if (!gapTooltip || !gapChart) return;
+  const gap = Math.abs(Number(model.sg) - Number(model.ss));
+  gapTooltip.textContent = `${model.model} · ${model.size} · SG ${percent(model.sg)} · SS ${percent(model.ss)} · gap ${gap.toFixed(1)} pp`;
+  const wrap = gapChart.parentElement.getBoundingClientRect();
+  const target = point.getBoundingClientRect();
+  gapTooltip.style.left = `${Math.min(Math.max(target.right - wrap.left + 8, 8), wrap.width - 228)}px`;
+  gapTooltip.style.top = `${Math.max(target.top - wrap.top - 10, 8)}px`;
+  gapTooltip.hidden = false;
+}
+
+function hideGapTooltip() {
+  if (gapTooltip) gapTooltip.hidden = true;
+}
+
+function renderGapChart(models, filter = gapFilter) {
+  if (!gapChart) return;
+  const localModels = models.filter((model) => model.class === 'local' && (filter === 'all' || model.band === filter)).sort((a, b) => Number(b.overall) - Number(a.overall));
+  const width = 720;
+  const rowHeight = 22;
+  const height = Math.max(250, 42 + localModels.length * rowHeight);
+  const plot = { left: 184, right: 35, top: 28, bottom: 20 };
+  const plotWidth = width - plot.left - plot.right;
+  const xMax = 32;
+  const x = (value) => plot.left + (Math.min(Number(value) || 0, xMax) / xMax) * plotWidth;
+  gapChart.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  gapChart.replaceChildren();
+  gapChart.appendChild(svgElement('title', { id: 'gap-title' }, 'State-Given and State-Seeking results by local model'));
+  gapChart.appendChild(svgElement('desc', { id: 'gap-desc' }, 'Each row connects a model\'s State-Seeking and State-Given scores, showing the interface gap.'));
+  const grid = svgElement('g');
+  [0, 5, 10, 15, 20, 25, 30].forEach((tick) => {
+    const tickX = x(tick);
+    grid.appendChild(svgElement('line', { class: 'analysis-gridline vertical', x1: tickX, x2: tickX, y1: plot.top - 14, y2: height - plot.bottom }));
+    grid.appendChild(svgElement('text', { class: 'analysis-axis', x: tickX, y: 15, 'text-anchor': 'middle' }, `${tick}%`));
+  });
+  gapChart.appendChild(grid);
+  const rows = svgElement('g');
+  localModels.forEach((model, index) => {
+    const rowY = plot.top + index * rowHeight;
+    const sgX = x(model.sg);
+    const ssX = x(model.ss);
+    rows.appendChild(svgElement('line', { class: 'gap-row-line', x1: plot.left, x2: width - plot.right, y1: rowY + 5, y2: rowY + 5 }));
+    rows.appendChild(svgElement('text', { class: 'gap-model-label', x: 6, y: rowY + 8 }, shortModelName(model.model)));
+    const span = svgElement('line', { class: 'gap-span', x1: Math.min(ssX, sgX), x2: Math.max(ssX, sgX), y1: rowY + 4, y2: rowY + 4 });
+    rows.appendChild(span);
+    const ssPoint = svgElement('circle', { class: 'gap-point ss', cx: ssX, cy: rowY + 4, r: 4, tabindex: '0', role: 'img', 'aria-label': `${model.model} State-Seeking ${percent(model.ss)}` });
+    const sgPoint = svgElement('circle', { class: 'gap-point sg', cx: sgX, cy: rowY + 4, r: 4, tabindex: '0', role: 'img', 'aria-label': `${model.model} State-Given ${percent(model.sg)}` });
+    [ssPoint, sgPoint].forEach((point) => {
+      point.addEventListener('mouseenter', () => showGapTooltip(model, point));
+      point.addEventListener('focus', () => showGapTooltip(model, point));
+      point.addEventListener('mouseleave', hideGapTooltip);
+      point.addEventListener('blur', hideGapTooltip);
+    });
+    rows.append(ssPoint, sgPoint);
+    rows.appendChild(svgElement('text', { class: 'gap-value', x: width - 6, y: rowY + 8, 'text-anchor': 'end' }, `${Math.abs(Number(model.sg) - Number(model.ss)).toFixed(1)} pp`));
+  });
+  gapChart.appendChild(rows);
+}
+
 fetch('data/results.json')
   .then((response) => {
     if (!response.ok) throw new Error(`Could not load results: ${response.status}`);
@@ -188,8 +302,11 @@ fetch('data/results.json')
   .then((data) => {
     const models = data.models || [];
     loadedModels = models;
+    loadedBandSummary = data.size_band_summary || [];
     render(models);
     renderLandscape(models);
+    renderLanguageChart(loadedBandSummary);
+    renderGapChart(models);
     filterButtons.forEach((button) => {
       button.addEventListener('click', () => {
         filterButtons.forEach((item) => item.classList.remove('active'));
@@ -458,6 +575,22 @@ landscapeMetricButtons.forEach((button) => {
     landscapeMetric = button.dataset.landscapeMetric;
     landscapeMetricButtons.forEach((item) => item.classList.toggle('active', item === button));
     renderLandscape(loadedModels, landscapeMetric);
+  });
+});
+
+languageMetricButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    languageMetric = button.dataset.languageMetric;
+    languageMetricButtons.forEach((item) => item.classList.toggle('active', item === button));
+    renderLanguageChart(loadedBandSummary, languageMetric);
+  });
+});
+
+gapFilterButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    gapFilter = button.dataset.gapFilter;
+    gapFilterButtons.forEach((item) => item.classList.toggle('active', item === button));
+    renderGapChart(loadedModels, gapFilter);
   });
 });
 
