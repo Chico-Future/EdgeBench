@@ -21,13 +21,13 @@ function percent(value) {
 
 function modelBrand(model) {
   const name = String(model.model || '').toLowerCase();
-  if (name.startsWith('qwen')) return { key: 'qwen', mark: 'Q', label: 'Qwen' };
-  if (name.startsWith('minicpm')) return { key: 'minicpm', mark: 'M', label: 'MiniCPM' };
-  if (name.startsWith('deepseek')) return { key: 'deepseek', mark: 'D', label: 'DeepSeek' };
-  if (name.startsWith('lfm')) return { key: 'lfm', mark: 'L', label: 'Liquid AI' };
-  if (name.startsWith('glm')) return { key: 'glm', mark: 'G', label: 'GLM' };
-  if (name.startsWith('mimo')) return { key: 'mimo', mark: 'Mi', label: 'MiMo' };
-  if (name.startsWith('minimax')) return { key: 'minimax', mark: 'Mx', label: 'MiniMax' };
+  if (name.startsWith('qwen')) return { key: 'qwen', label: 'Qwen', src: 'assets/model-logos/qwen-icon.png' };
+  if (name.startsWith('minicpm')) return { key: 'minicpm', label: 'MiniCPM', src: 'assets/model-logos/minicpm-icon.png' };
+  if (name.startsWith('deepseek')) return { key: 'deepseek', label: 'DeepSeek', src: 'assets/model-logos/deepseek-icon.png' };
+  if (name.startsWith('lfm')) return { key: 'lfm', label: 'Liquid AI', src: 'assets/model-logos/lfm.png' };
+  if (name.startsWith('glm')) return { key: 'glm', label: 'GLM / Z.ai', src: 'assets/model-logos/glm.png' };
+  if (name.startsWith('mimo')) return { key: 'mimo', label: 'MiMo', src: 'assets/model-logos/mimo-wordmark.svg' };
+  if (name.startsWith('minimax')) return { key: 'minimax', label: 'MiniMax', src: 'assets/model-logos/minimax-icon.png' };
   return { key: 'generic', mark: '·', label: 'Model' };
 }
 
@@ -35,9 +35,18 @@ function modelLogo(model) {
   const brand = modelBrand(model);
   const logo = document.createElement('span');
   logo.className = `model-logo ${brand.key}`;
-  logo.textContent = brand.mark;
   logo.setAttribute('aria-hidden', 'true');
   logo.title = brand.label;
+  if (brand.src) {
+    const image = document.createElement('img');
+    image.src = brand.src;
+    image.alt = '';
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    logo.appendChild(image);
+  } else {
+    logo.textContent = brand.mark;
+  }
   return logo;
 }
 

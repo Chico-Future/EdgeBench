@@ -915,7 +915,7 @@ nav a:hover { background: transparent; color: var(--blue); }
   background: radial-gradient(260px 150px at 100% 0%, rgba(255, 122, 61, .15), transparent 78%), var(--surface);
 }
 
-/* Model identity marks keep the leaderboard scannable without adding external assets. */
+/* Official model-family logos keep the leaderboard scannable. */
 .model-cell {
   display: grid;
   grid-template-columns: 31px 28px minmax(0, 1fr);
@@ -928,8 +928,10 @@ nav a:hover { background: transparent; color: var(--blue); }
   width: 26px;
   height: 26px;
   place-items: center;
+  overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .15);
   border-radius: 8px;
+  background: #fff;
   color: #090909;
   font-family: Inter, Arial, sans-serif;
   font-size: 11px;
@@ -937,14 +939,8 @@ nav a:hover { background: transparent; color: var(--blue); }
   letter-spacing: -.04em;
   box-shadow: 0 6px 18px rgba(0, 0, 0, .22);
 }
-.model-logo.qwen { background: linear-gradient(145deg, #ffc08c, #f36c54); }
-.model-logo.minicpm { background: linear-gradient(145deg, #e2b7ff, #9e70ff); }
-.model-logo.deepseek { background: linear-gradient(145deg, #a2d9ff, #5c8eff); }
-.model-logo.lfm { background: linear-gradient(145deg, #a4efd4, #48b28c); }
-.model-logo.glm { background: linear-gradient(145deg, #ffc0c0, #e46b75); }
-.model-logo.mimo { background: linear-gradient(145deg, #ffe2a0, #dfa14a); font-size: 9px; }
-.model-logo.minimax { background: linear-gradient(145deg, #ffc2e8, #d06ab4); font-size: 9px; }
 .model-logo.generic { background: linear-gradient(145deg, #d2d8e2, #7c8797); }
+.model-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .reference-row { grid-template-columns: 26px 82px 1fr 38px; }
 .reference-row .model-logo { width: 22px; height: 22px; border-radius: 7px; font-size: 9px; }
 .results-table tbody tr.reference:first-of-type td { border-top-color: var(--hair); }
