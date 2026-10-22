@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="EdgeBench evaluates small language models on practical agent tasks, starting with the bilingual EdgeBench-Home benchmark.">
+  <meta name="theme-color" content="#090909">
+  <title>EdgeBench-Home — EdgeBench</title>
+  <link rel="icon" href="../assets/edgebench-logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../style.css?v=40">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar"><a class="brand" href="../" aria-label="EdgeBench suite home"><span class="brand-logo-crop" aria-hidden="true"><img src="../assets/edgebench-logo.svg" alt=""></span><span>EdgeBench</span></a><nav><a href="../">Suite</a><a href="#tasks">Tasks</a><a href="#results">Results</a><a href="#reproduce">Reproduce</a><a href="https://github.com/Chico-Future/EdgeBench">GitHub ↗</a></nav></header>
+<main id="main">
+  <section id="home" class="section intro">
+    <div>
+      <h1>EdgeBench-Home</h1>
+      <p class="lead">The first module in an extensible benchmark suite for small local models in a simulated home.</p>
+      <div class="actions">
+        <a class="button" href="#results">View results <span aria-hidden="true">↓</span></a>
+        <a class="intro-secondary" href="https://huggingface.co/datasets/chico-research/EdgeBench-Home">Explore the dataset <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </section>
+  <section class="facts" aria-label="Benchmark facts"><div><b>840</b><span>bilingual cases</span></div><div><b>7</b><span>task families</span></div><div><b>2</b><span>interaction interfaces</span></div><div><b>18</b><span>local models evaluated</span></div></section>
+  <section id="tasks" class="section tasks">
+    <div class="tasks-intro">
+      <div><h2>Task families</h2><p class="lead">See how each request changes the home state.</p></div>
+    </div>
+    <div class="task-explorer">
+      <div class="task-list" role="group" aria-label="Task family selector">
+        <button type="button" class="task-row selected" data-family="DGC" aria-pressed="true"><span class="task-code">DGC</span><strong class="task-name">Device grounding</strong></button>
+        <button type="button" class="task-row" data-family="MSC" aria-pressed="false"><span class="task-code">MSC</span><strong class="task-name">Multi-device control</strong></button>
+        <button type="button" class="task-row" data-family="AIR" aria-pressed="false"><span class="task-code">AIR</span><strong class="task-name">Ambiguity resolution</strong></button>
+        <button type="button" class="task-row" data-family="FAR" aria-pressed="false"><span class="task-code">FAR</span><strong class="task-name">Future automation</strong></button>
+        <button type="button" class="task-row" data-family="DCR" aria-pressed="false"><span class="task-code">DCR</span><strong class="task-name">Dialogue context</strong></button>
+        <button type="button" class="task-row" data-family="PMU" aria-pressed="false"><span class="task-code">PMU</span><strong class="task-name">Personalized memory</strong></button>
+        <button type="button" class="task-row" data-family="REQ" aria-pressed="false"><span class="task-code">REQ</span><strong class="task-name">Read-only queries</strong></button>
+      </div>
+      <article class="task-demo" aria-labelledby="task-demo-title">
+        <div class="demo-head">
+          <h3 id="task-demo-title" aria-live="polite">Device grounding</h3>
+          <div class="walk-controls" role="group" aria-label="Walkthrough playback">
+            <button id="walk-prev" class="walk-control icon" type="button" aria-label="Previous step" title="Previous step">‹</button>
+            <button id="walk-toggle" class="walk-control play" type="button">Pause</button>
+            <button id="walk-next" class="walk-control icon" type="button" aria-label="Next step" title="Next step">›</button>
+          </div>
+        </div>
+        <div class="demo-context">
+          <div class="interface-view">
+            <span class="control-label">Interface</span>
+            <div class="interface-view-head" role="group" aria-label="Choose interaction interface">
+              <button class="interface-button active" data-interface="SG" type="button" aria-pressed="true">State-Given</button>
+              <button class="interface-button" data-interface="SS" type="button" aria-pressed="false">State-Seeking</button>
+            </div>
+          </div>
+          <div class="demo-prompt"><span>Request</span><p id="task-prompt" aria-live="polite"></p></div>
+        </div>
+        <div id="walk-steps" class="walk-steps" role="group" aria-label="Choose a walkthrough step"></div>
+        <div class="scene-canvas">
+          <div class="scene-bar"><span id="scene-mode" class="scene-mode">Context supplied</span></div>
+          <div id="scene-items" class="scene-items"></div>
+        </div>
+        <div class="walk-copy"><span id="walk-counter" class="walk-counter"></span><p id="walk-step-copy"></p></div>
+      </article>
+    </div>
+  </section>
+  <section id="results" class="section results"><div class="section-label">Results</div><div class="section-head"><div><h2>Results by local model size.</h2><p>Strict micro-success across both language tracks; 4 server-hosted models serve as reference baselines.</p></div></div><div class="results-overview"><div class="trend-panel"><div class="panel-top"><span>LOCAL SIZE-BAND MEANS</span><span class="legend"><i></i>State-Given <i class="gray"></i>State-Seeking</span></div><div class="chart"><div class="axis"><span>25%</span><span>20%</span><span>15%</span><span>10%</span><span>5%</span><span>0%</span></div><div class="plot"><div class="gridline"></div><div class="gridline"></div><div class="gridline"></div><div class="gridline"></div><div class="gridline"></div><div class="gridline"></div><div class="group"><div class="bar sg" style="height:2.4%" title="State-Given 0.6%"></div><div class="bar ss" style="height:0%" title="State-Seeking 0.0%"></div><label>≤1B<small>n=7 · 0.6 / 0.0</small></label></div><div class="group"><div class="bar sg" style="height:36%" title="State-Given 9.0%"></div><div class="bar ss" style="height:7.6%" title="State-Seeking 1.9%"></div><label>1–3B<small>n=9 · 9.0 / 1.9</small></label></div><div class="group"><div class="bar sg" style="height:89.2%" title="State-Given 22.3%"></div><div class="bar ss" style="height:35.2%" title="State-Seeking 8.8%"></div><label>3–7B<small>n=2 · 22.3 / 8.8</small></label></div></div></div></div><div class="model-landscape"><div class="panel-top"><span>LOCAL MODEL LANDSCAPE</span><div class="landscape-controls" role="group" aria-label="Choose interface metric"><button class="landscape-metric active" data-landscape-metric="sg" type="button">State-Given</button><button class="landscape-metric" data-landscape-metric="ss" type="button">State-Seeking</button></div></div><div class="landscape-layout"><div class="landscape-chart-wrap"><svg id="landscape-chart" viewBox="0 0 760 276" role="img" aria-labelledby="landscape-title landscape-desc"><title id="landscape-title">Local model success by parameter count</title><desc id="landscape-desc">Each point represents one evaluated local model. Color identifies its model family; horizontal position shows parameter count and vertical position shows strict micro-success.</desc></svg><div id="landscape-tooltip" class="landscape-tooltip" hidden></div></div><aside class="landscape-reading"><div class="local-leader"><span>TOP LOCAL</span><strong id="landscape-head">Small models remain tightly clustered near zero.</strong></div><div class="reference-mini"><span>REFERENCE BASELINES</span><div id="reference-bars"></div></div></aside></div></div></div><div class="analysis-grid"><div class="analysis-panel"><div class="panel-top"><span>LANGUAGE TRACKS BY SIZE</span></div><div class="analysis-legend"><i class="cn"></i>Chinese <i class="en"></i>English</div><div class="language-charts"><section class="language-chart-panel"><h3>State-Given</h3><svg id="language-chart-sg" class="language-chart-svg" viewBox="0 0 520 258" role="img" aria-labelledby="language-chart-sg-title language-chart-sg-desc"></svg></section><section class="language-chart-panel"><h3>State-Seeking</h3><svg id="language-chart-ss" class="language-chart-svg" viewBox="0 0 520 258" role="img" aria-labelledby="language-chart-ss-title language-chart-ss-desc"></svg></section></div></div><div class="analysis-panel gap-panel"><div class="panel-top"><span>INTERFACE GAP BY MODEL</span><div class="analysis-controls" role="group" aria-label="Filter interface gap chart"><button class="gap-filter active" data-gap-filter="all" type="button">All local</button><button class="gap-filter" data-gap-filter="≤1B" type="button">≤1B</button><button class="gap-filter" data-gap-filter="1--3B" type="button">1–3B</button><button class="gap-filter" data-gap-filter="3--7B" type="button">3–7B</button></div></div><div class="analysis-legend"><i class="sg-dot"></i>State-Given <i class="ss-dot"></i>State-Seeking</div><div class="gap-chart-wrap"><svg id="gap-chart" viewBox="0 0 720 250" role="img" aria-labelledby="gap-title gap-desc"><title id="gap-title">State-Given and State-Seeking results by local model</title><desc id="gap-desc">Each row connects a model's State-Seeking and State-Given scores, showing the interface gap.</desc></svg><div id="gap-tooltip" class="landscape-tooltip" hidden></div></div><p class="chart-caption">Interface gap for each local model.</p></div></div><div class="band-summary" aria-label="Size-band comparison"><button class="band-card" data-band-filter="≤1B"><span class="band-card-head"><b>≤1B</b><small>7 configurations</small></span><span class="band-bars"><span><i>SG</i><em style="width:2.4%"></em><strong>0.6%</strong></span><span><i>SS</i><em class="ss" style="width:0%"></em><strong>0.0%</strong></span></span><span class="band-gap">interface gap <b>0.6 pp</b></span></button><button class="band-card" data-band-filter="1--3B"><span class="band-card-head"><b>1–3B</b><small>9 configurations</small></span><span class="band-bars"><span><i>SG</i><em style="width:36%"></em><strong>9.0%</strong></span><span><i>SS</i><em class="ss" style="width:7.6%"></em><strong>1.9%</strong></span></span><span class="band-gap">interface gap <b>7.1 pp</b></span></button><button class="band-card" data-band-filter="3--7B"><span class="band-card-head"><b>3–7B</b><small>2 configurations</small></span><span class="band-bars"><span><i>SG</i><em style="width:89.2%"></em><strong>22.3%</strong></span><span><i>SS</i><em class="ss" style="width:35.2%"></em><strong>8.8%</strong></span></span><span class="band-gap">interface gap <b>13.5 pp</b></span></button></div><div class="results-table-wrap"><div class="table-head"><span>LOCAL MODEL LEADERBOARD</span><div class="filters"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="≤1B">≤1B</button><button class="filter" data-filter="1--3B">1–3B</button><button class="filter" data-filter="3--7B">3–7B</button><button class="filter" data-filter="Server">Reference</button></div></div><table class="results-table"><thead><tr><th>Model</th><th>Size</th><th>Platform</th><th>SG</th><th>SS</th><th>Mean</th></tr></thead><tbody id="model-rows"></tbody></table><p class="table-note">Local first; server models are reference baselines. <a href="../data/results.json">Source data ↗</a></p></div></section>
+  <section id="reproduce" class="section reproduce"><div class="section-label">Reproduce</div><div class="two-col"><div><h2>Run the benchmark.</h2><p class="lead">Use the public runners and scorer with the EdgeBench-Home dataset.</p><div class="actions"><a class="button" href="https://github.com/Chico-Future/EdgeBench#quick-start">Quick start ↗</a></div></div><pre class="code"><code>python3 -m cloud.run_state_given --help
+python3 -m cloud.run_state_seeking --help
+python3 -m scoring.unified_scorer --help</code></pre></div></section>
+</main>
+<footer><div><a class="brand" href="../" aria-label="EdgeBench suite home"><span class="brand-logo-crop" aria-hidden="true"><img src="../assets/edgebench-logo.svg" alt=""></span><span>EdgeBench</span></a></div><nav><a href="https://huggingface.co/datasets/chico-research/EdgeBench-Home">Dataset</a><a href="https://github.com/Chico-Future/EdgeBench">GitHub</a><a href="https://github.com/Chico-Future/EdgeBench/blob/main/LICENSE">Apache-2.0</a></nav></footer>
+<script src="../app.js?v=26"></script>
+</body>
+</html>

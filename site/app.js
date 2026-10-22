@@ -3,16 +3,16 @@ const filterButtons = document.querySelectorAll('.filter');
 const landscapeChart = document.getElementById('landscape-chart');
 const landscapeTooltip = document.getElementById('landscape-tooltip');
 const landscapeMetricButtons = document.querySelectorAll('.landscape-metric');
-const languageChart = document.getElementById('language-chart');
-const languageMetricButtons = document.querySelectorAll('.analysis-toggle');
-const languageCaption = document.getElementById('language-caption');
+const languageCharts = [
+  { element: document.getElementById('language-chart-sg'), key: 'state_given_by_language', label: 'State-Given' },
+  { element: document.getElementById('language-chart-ss'), key: 'state_seeking_by_language', label: 'State-Seeking' }
+];
 const gapChart = document.getElementById('gap-chart');
 const gapTooltip = document.getElementById('gap-tooltip');
 const gapFilterButtons = document.querySelectorAll('.gap-filter');
 let loadedModels = [];
 let loadedBandSummary = [];
 let landscapeMetric = 'sg';
-let languageMetric = 'sg';
 let gapFilter = 'all';
 
 function percent(value) {
@@ -55,13 +55,21 @@ function modelRow(model, rank) {
   if (model.class === 'baseline') row.className = 'reference';
 
   const name = document.createElement('td');
-  name.className = 'model-cell';
+  const modelCell = document.createElement('div');
+  modelCell.className = 'model-cell';
   const rankLabel = document.createElement('span');
   rankLabel.className = 'rank';
   rankLabel.textContent = String(rank).padStart(2, '0');
   const modelName = document.createElement('strong');
   modelName.textContent = model.model;
-  name.append(rankLabel, modelLogo(model), modelName);
+  modelCell.append(rankLabel, modelLogo(model), modelName);
+  if (model.class === 'baseline') {
+    const baselineLabel = document.createElement('span');
+    baselineLabel.className = 'baseline-tag';
+    baselineLabel.textContent = 'Baseline';
+    modelCell.appendChild(baselineLabel);
+  }
+  name.appendChild(modelCell);
 
   const cells = [
     model.size || '—',
@@ -177,11 +185,11 @@ function renderLandscape(models, metric = landscapeMetric) {
   const topModel = [...localModels].sort((a, b) => Number(b[metric]) - Number(a[metric]))[0];
   localModels.forEach((model) => {
     const point = svgElement('circle', {
-      class: `landscape-point metric-${metric}${model === topModel ? ' is-top' : ''}`,
+      class: `landscape-point${model === topModel ? ' is-top' : ''}`,
       cx: x(numericSize(model)),
       cy: y(model[metric]),
       r: model === topModel ? 5 : 4,
-      'data-band': model.band,
+      'data-brand': modelBrand(model).key,
       tabindex: '0',
       role: 'button',
       'aria-label': `${model.model}, ${model.size}, ${metric === 'sg' ? 'State-Given' : 'State-Seeking'} ${percent(model[metric])}`
@@ -199,69 +207,62 @@ function renderLandscape(models, metric = landscapeMetric) {
     referenceBars.replaceChildren();
     models.filter((model) => model.class === 'baseline').sort((a, b) => Number(b[metric]) - Number(a[metric])).forEach((model) => {
       const row = document.createElement('div');
-      row.className = `reference-row metric-${metric}`;
+      row.className = 'reference-row';
       row.appendChild(modelLogo(model));
       const label = document.createElement('label');
       label.textContent = model.model;
       label.title = model.model;
-      const bar = document.createElement('i');
-      bar.style.width = `${Math.min(Number(model[metric]) / 80 * 100, 100)}%`;
       const value = document.createElement('b');
       value.textContent = percent(model[metric]);
-      row.append(label, bar, value);
+      row.append(label, value);
       referenceBars.appendChild(row);
     });
   }
 
   const head = document.getElementById('landscape-head');
-  const copy = document.getElementById('landscape-copy');
-  if (head && copy && topModel) {
+  if (head && topModel) {
     const metricName = metric === 'sg' ? 'State-Given' : 'State-Seeking';
-    head.textContent = `${topModel.model} leads local ${metricName} at ${percent(topModel[metric])}.`;
-    copy.textContent = `${localModels.length} local models are plotted by parameter count. The size bands make the upward trend visible while preserving each model-level result.`;
+    head.textContent = `${topModel.model} · ${metricName} ${percent(topModel[metric])}`;
   }
 }
 
-function renderLanguageChart(summary, metric = languageMetric) {
-  if (!languageChart) return;
+function renderLanguageChart(summary) {
   const width = 520;
   const height = 258;
   const plot = { left: 46, right: 18, top: 18, bottom: 38 };
-  const plotWidth = width - plot.left - plot.right;
   const plotHeight = height - plot.top - plot.bottom;
   const yMax = 25;
   const y = (value) => plot.top + (1 - Math.min(Number(value) || 0, yMax) / yMax) * plotHeight;
   const groupX = [125, 260, 395];
-  const languageKey = metric === 'sg' ? 'state_given_by_language' : 'state_seeking_by_language';
-  const metricName = metric === 'sg' ? 'State-Given' : 'State-Seeking';
-  languageChart.replaceChildren();
-  languageChart.appendChild(svgElement('title', { id: 'language-title' }, 'Chinese and English success by local model size'));
-  languageChart.appendChild(svgElement('desc', { id: 'language-desc' }, 'Grouped bars compare the Chinese and English tracks for each local model size band.'));
-  const grid = svgElement('g');
-  [0, 5, 10, 15, 20, 25].forEach((tick) => {
-    const tickY = y(tick);
-    grid.appendChild(svgElement('line', { class: 'analysis-gridline', x1: plot.left, x2: width - plot.right, y1: tickY, y2: tickY }));
-    grid.appendChild(svgElement('text', { class: 'analysis-axis', x: plot.left - 8, y: tickY + 3, 'text-anchor': 'end' }, `${tick}%`));
+  languageCharts.forEach(({ element, key, label }) => {
+    if (!element) return;
+    element.replaceChildren();
+    element.appendChild(svgElement('title', { id: `${element.id}-title` }, `${label} success by local model size and language`));
+    element.appendChild(svgElement('desc', { id: `${element.id}-desc` }, `Grouped bars compare Chinese and English strict micro-success across local model size bands for ${label}.`));
+    const grid = svgElement('g');
+    [0, 5, 10, 15, 20, 25].forEach((tick) => {
+      const tickY = y(tick);
+      grid.appendChild(svgElement('line', { class: 'analysis-gridline', x1: plot.left, x2: width - plot.right, y1: tickY, y2: tickY }));
+      grid.appendChild(svgElement('text', { class: 'analysis-axis', x: plot.left - 8, y: tickY + 3, 'text-anchor': 'end' }, `${tick}%`));
+    });
+    element.appendChild(grid);
+    const bars = svgElement('g');
+    summary.forEach((band, index) => {
+      const values = band[key] || {};
+      const chinese = Number(values.Chinese) || 0;
+      const english = Number(values.English) || 0;
+      const baseY = y(0);
+      const chineseX = groupX[index] - 20;
+      const englishX = groupX[index] + 4;
+      const chineseBar = svgElement('rect', { class: 'language-bar chinese', x: chineseX, y: y(chinese), width: 18, height: Math.max(baseY - y(chinese), 1), rx: 2, tabindex: '0', role: 'img', 'aria-label': `${label}, ${band.label}, Chinese ${percent(chinese)}` });
+      const englishBar = svgElement('rect', { class: 'language-bar english', x: englishX, y: y(english), width: 18, height: Math.max(baseY - y(english), 1), rx: 2, tabindex: '0', role: 'img', 'aria-label': `${label}, ${band.label}, English ${percent(english)}` });
+      bars.append(chineseBar, englishBar);
+      if (chinese > 0) bars.appendChild(svgElement('text', { class: 'analysis-value', x: chineseX + 9, y: y(chinese) - 6, 'text-anchor': 'middle' }, chinese.toFixed(1)));
+      if (english > 0) bars.appendChild(svgElement('text', { class: 'analysis-value', x: englishX + 9, y: y(english) - 6, 'text-anchor': 'middle' }, english.toFixed(1)));
+      bars.appendChild(svgElement('text', { class: 'analysis-axis-label', x: groupX[index], y: height - 16, 'text-anchor': 'middle' }, band.label));
+    });
+    element.appendChild(bars);
   });
-  languageChart.appendChild(grid);
-  const bars = svgElement('g');
-  summary.forEach((band, index) => {
-    const values = band[languageKey] || {};
-    const chinese = Number(values.Chinese) || 0;
-    const english = Number(values.English) || 0;
-    const baseY = y(0);
-    const chineseX = groupX[index] - 20;
-    const englishX = groupX[index] + 4;
-    const chineseBar = svgElement('rect', { class: 'language-bar chinese', x: chineseX, y: y(chinese), width: 18, height: Math.max(baseY - y(chinese), chinese ? 1 : 0), rx: 2, tabindex: '0', role: 'img', 'aria-label': `${band.label} Chinese ${percent(chinese)}` });
-    const englishBar = svgElement('rect', { class: 'language-bar english', x: englishX, y: y(english), width: 18, height: Math.max(baseY - y(english), english ? 1 : 0), rx: 2, tabindex: '0', role: 'img', 'aria-label': `${band.label} English ${percent(english)}` });
-    bars.append(chineseBar, englishBar);
-    if (chinese > 0) bars.appendChild(svgElement('text', { class: 'analysis-value', x: chineseX + 9, y: y(chinese) - 6, 'text-anchor': 'middle' }, chinese.toFixed(1)));
-    if (english > 0) bars.appendChild(svgElement('text', { class: 'analysis-value', x: englishX + 9, y: y(english) - 6, 'text-anchor': 'middle' }, english.toFixed(1)));
-    bars.appendChild(svgElement('text', { class: 'analysis-axis-label', x: groupX[index], y: height - 16, 'text-anchor': 'middle' }, band.label));
-  });
-  languageChart.appendChild(bars);
-  languageChart.appendChild(svgElement('text', { class: 'analysis-axis-label', x: plot.left, y: 10 }, `${metricName} strict success`));
-  if (languageCaption) languageCaption.textContent = `Chinese and English means are shown separately for ${metricName}.`;
 }
 
 function shortModelName(name) {
@@ -327,7 +328,7 @@ function renderGapChart(models, filter = gapFilter) {
   gapChart.appendChild(rows);
 }
 
-fetch('data/results.json')
+fetch('../data/results.json')
   .then((response) => {
     if (!response.ok) throw new Error(`Could not load results: ${response.status}`);
     return response.json();
@@ -352,7 +353,7 @@ fetch('data/results.json')
     const row = document.createElement('tr');
     const cell = document.createElement('td');
     cell.colSpan = 6;
-    cell.textContent = 'Results could not be loaded. Open data/results.json to inspect the release.';
+    cell.textContent = 'Results could not be loaded. Open ../data/results.json to inspect the release.';
     row.appendChild(cell);
     tableBody.replaceChildren(row);
     console.error(error);
@@ -360,155 +361,494 @@ fetch('data/results.json')
 
 const taskData = {
   DGC: {
-    title: 'Device Grounding and Control',
+    title: 'Device grounding',
     prompt: 'Turn on the desk lamp beside the monitor.',
-    caption: 'ROOM / DEVICE STATE',
-    success: 'Identify the intended device, apply one valid control, and leave unrelated devices unchanged.',
     steps: [
-      ['01', 'Ground the reference', 'Resolve “desk lamp” to the correct device among similar candidates.'],
-      ['02', 'Apply one control', 'Execute the requested service with valid parameters.'],
-      ['03', 'Preserve other state', 'The target changes; the ceiling lamp and fan remain unchanged.']
+      ['01', 'Use supplied context', 'Find the desk lamp beside the monitor in the provided home state.'],
+      ['02', 'Control the target', 'Turn on the grounded desk lamp.'],
+      ['03', 'Check side effects', 'The ceiling lamp and fan stay unchanged.']
     ],
-    scenes: [
-      '<div class="scene-device"><span>◌</span><small>DESK LAMP</small></div><div class="scene-device"><span>◉</span><small>CEILING LAMP</small></div><div class="scene-device"><span>⌁</span><small>FAN</small></div>',
-      '<div class="scene-device target"><span class="pulse"></span><span>◌</span><small>DESK LAMP / ON</small></div><div class="scene-device"><span>◉</span><small>CEILING LAMP</small></div><div class="scene-device"><span>⌁</span><small>FAN</small></div>',
-      '<div class="scene-device changed"><span>◌</span><small>DESK LAMP / ON</small></div><div class="scene-device muted"><span>◉</span><small>CEILING LAMP</small></div><div class="scene-device muted"><span>⌁</span><small>FAN</small></div>'
+    seekSteps: [
+      ['01', 'Start partially observed', 'The target is not grounded until device state is queried.'],
+      ['02', 'Query and resolve', 'Inspect available devices and locate the desk lamp.'],
+      ['03', 'Control and verify', 'Turn it on; leave other devices unchanged.']
     ]
   },
   MSC: {
-    title: 'Multi-device Selection and Control',
+    title: 'Multi-device control',
     prompt: 'Turn on the lights in occupied rooms, but leave the fans alone.',
-    caption: 'MULTI-DEVICE STATE',
-    success: 'Select the complete requested set, control every target, and avoid adding non-target devices.',
     steps: [
-      ['01', 'Select the target set', 'Use the room and state rules to identify all occupied-room lights.'],
-      ['02', 'Coordinate actions', 'Apply the same intent across the selected devices.'],
-      ['03', 'Exclude non-targets', 'Fans and lights in empty rooms remain unchanged.']
+      ['01', 'Apply the room rule', 'Select lights in occupied rooms from the supplied state.'],
+      ['02', 'Control selected lights', 'Turn on both matching lights.'],
+      ['03', 'Exclude non-targets', 'Fans and empty-room lights stay unchanged.']
     ],
-    scenes: [
-      '<div class="scene-device"><span>◉</span><small>LIVING / ON</small></div><div class="scene-device"><span>◌</span><small>BEDROOM / OFF</small></div><div class="scene-device muted"><span>⌁</span><small>FAN / OFF</small></div>',
-      '<div class="scene-device target"><span class="pulse"></span><span>◉</span><small>LIVING / ON</small></div><div class="scene-device target"><span class="pulse"></span><span>◌</span><small>BEDROOM / ON</small></div><div class="scene-device muted"><span>⌁</span><small>FAN / OFF</small></div>',
-      '<div class="scene-device changed"><span>◉</span><small>LIVING / ON</small></div><div class="scene-device changed"><span>◌</span><small>BEDROOM / ON</small></div><div class="scene-device muted"><span>⌁</span><small>FAN / OFF</small></div>'
+    seekSteps: [
+      ['01', 'Query room state', 'Check room occupancy and device status.'],
+      ['02', 'Select and control', 'Turn on lights only in occupied rooms.'],
+      ['03', 'Verify exclusions', 'Fans and empty-room lights stay unchanged.']
     ]
   },
   AIR: {
-    title: 'Ambiguity and Intent Resolution',
+    title: 'Ambiguity resolution',
     prompt: 'Make it comfortable in here.',
-    caption: 'REQUEST / EVIDENCE',
-    success: 'Recognize when the available evidence is insufficient, ask for the missing slot, and do not act on a guess.',
     steps: [
-      ['01', 'Check the evidence', 'The request does not identify a room or a specific comfort action.'],
-      ['02', 'Ask one useful question', 'Request the missing information that makes the next action executable.'],
-      ['03', 'Do not act yet', 'No device changes before the ambiguity is resolved.']
+      ['01', 'Check the request', 'The room and the desired adjustment are missing.'],
+      ['02', 'Ask before acting', 'Ask which room and what should change.'],
+      ['03', 'Hold device state', 'No device changes while the request is unclear.']
     ],
-    scenes: [
-      '<div class="scene-device dialogue"><span>“Make it comfortable in here.”</span><small>UNDER-SPECIFIED REQUEST</small></div>',
-      '<div class="scene-device target"><span class="pulse"></span><span>Which room should I adjust?</span><small>CLARIFICATION</small></div>',
-      '<div class="scene-device muted"><span>◌</span><small>NO ACTION</small></div><div class="scene-device muted"><span>◉</span><small>NO ACTION</small></div><div class="scene-device muted"><span>⌁</span><small>NO ACTION</small></div>'
+    seekSteps: [
+      ['01', 'Inspect available state', 'A device query cannot supply the missing intent.'],
+      ['02', 'Ask a focused question', 'Clarify the room and desired adjustment.'],
+      ['03', 'Wait for the reply', 'Leave all devices unchanged.']
     ]
   },
   FAR: {
-    title: 'Future Automation Registration',
+    title: 'Future automation',
     prompt: 'Every weekday at 7:00, turn on the kitchen light.',
-    caption: 'CURRENT STATE / FUTURE RULE',
-    success: 'Register the requested time rule while leaving the current device state unchanged.',
     steps: [
-      ['01', 'Parse the condition', 'Separate the future schedule from the action it will trigger.'],
-      ['02', 'Register the rule', 'Store the weekday and time condition with the kitchen-light action.'],
-      ['03', 'Leave now unchanged', 'The kitchen light does not turn on during registration.']
+      ['01', 'Parse the schedule', 'Weekdays at 7:00; turn on the kitchen light.'],
+      ['02', 'Save the future rule', 'Register the trigger and its action.'],
+      ['03', 'Keep now unchanged', 'The kitchen light stays off until the trigger.']
     ],
-    scenes: [
-      '<div class="scene-device"><span>◌</span><small>KITCHEN / OFF</small></div><div class="scene-device"><span>◷</span><small>NOW</small></div>',
-      '<div class="scene-device rule"><span>MON–FRI · 07:00 → LIGHT ON</span><small>REGISTERED RULE</small></div>',
-      '<div class="scene-device muted"><span>◌</span><small>KITCHEN / STILL OFF</small></div><div class="scene-device changed"><span>✓</span><small>RULE SAVED</small></div>'
+    seekSteps: [
+      ['01', 'Query current state', 'Inspect the kitchen light before scheduling.'],
+      ['02', 'Register the rule', 'Save weekdays at 7:00 → kitchen light on.'],
+      ['03', 'Wait for the trigger', 'Current device state remains unchanged.']
     ]
   },
   DCR: {
-    title: 'Dialogue-context Resolution',
-    prompt: 'User: Turn on the lamp.  User: Actually, the bedroom one.',
-    caption: 'DIALOGUE / CURRENT TURN',
-    success: 'Use prior dialogue to resolve the correction, execute only the current request, and avoid replaying history.',
+    title: 'Dialogue context',
+    prompt: 'Turn on the lamp. Actually, the bedroom one.',
     steps: [
-      ['01', 'Read the dialogue', 'The first turn names a lamp; the second turn corrects its location.'],
-      ['02', 'Resolve the correction', 'Use “actually” and “bedroom” to update the current target.'],
-      ['03', 'Execute once', 'Control the bedroom lamp without repeating an earlier action.']
+      ['01', 'Use the full dialogue', 'The supplied context includes the latest correction.'],
+      ['02', 'Update the target', '“The bedroom one” replaces the earlier reference.'],
+      ['03', 'Act on this turn', 'Turn on the bedroom lamp once.']
     ],
-    scenes: [
-      '<div class="scene-device dialogue"><span>“Actually, the bedroom one.”</span><small>CURRENT TURN</small></div>',
-      '<div class="scene-device"><span>◌</span><small>DESK / IGNORED</small></div><div class="scene-device target"><span class="pulse"></span><span>◌</span><small>BEDROOM / TARGET</small></div>',
-      '<div class="scene-device muted"><span>◌</span><small>DESK / UNCHANGED</small></div><div class="scene-device changed"><span>◌</span><small>BEDROOM / ON</small></div>'
+    seekSteps: [
+      ['01', 'Retrieve prior context', 'Query the earlier turn needed to resolve “one”.'],
+      ['02', 'Apply the correction', 'Resolve the current target to the bedroom lamp.'],
+      ['03', 'Act on this turn', 'Turn it on once; do not replay history.']
     ]
   },
   PMU: {
-    title: 'Personalized Memory Use',
+    title: 'Personalized memory',
     prompt: 'Set the living-room lights the way I prefer in the evening.',
-    caption: 'USER / VALID PREFERENCE',
-    success: 'Select the current user’s valid preference and apply it to the requested target without changing unrelated state.',
     steps: [
-      ['01', 'Retrieve relevant memory', 'Find a preference that belongs to this user and context.'],
-      ['02', 'Check validity', 'Ignore superseded or unrelated preferences before acting.'],
-      ['03', 'Apply the preference', 'Set the living-room lights to the remembered evening level.']
+      ['01', 'Use supplied memory', 'Retrieve the user’s evening-light preference.'],
+      ['02', 'Validate the memory', 'Check that it is current and relevant.'],
+      ['03', 'Apply the preference', 'Set the living-room light to warm, 40%.']
     ],
-    scenes: [
-      '<div class="scene-device memory"><span>Evening: warm, 40%</span><small>VALID MEMORY</small></div>',
-      '<div class="scene-device target"><span class="pulse"></span><span>40%</span><small>LIVING LIGHTS</small></div><div class="scene-device muted"><span>◉</span><small>OTHER ROOM</small></div>',
-      '<div class="scene-device changed"><span>40%</span><small>LIVING / WARM</small></div><div class="scene-device muted"><span>◉</span><small>OTHER / SAME</small></div>'
+    seekSteps: [
+      ['01', 'Query relevant memory', 'Search for this user’s evening preference.'],
+      ['02', 'Validate the result', 'Ignore stale or unrelated memories.'],
+      ['03', 'Apply the preference', 'Set the living-room light to warm, 40%.']
     ]
   },
   REQ: {
-    title: 'Read-only Environment Queries',
+    title: 'Read-only queries',
     prompt: 'How many lights are on right now?',
-    caption: 'OBSERVATION / NO MUTATION',
-    success: 'Inspect permitted state, return the correct structured answer, and make no device-control attempt.',
     steps: [
-      ['01', 'Inspect allowed state', 'Read the current device statuses and identify lights.'],
-      ['02', 'Count the matches', 'Aggregate only the devices satisfying the query.'],
-      ['03', 'Return the answer', 'Report the count while preserving the environment exactly.']
+      ['01', 'Read supplied state', 'Count lights currently marked on.'],
+      ['02', 'Return the result', 'Two lights are on.'],
+      ['03', 'Make no changes', 'Every device remains in its current state.']
     ],
-    scenes: [
-      '<div class="scene-device query-target"><span>◉</span><small>ON</small></div><div class="scene-device muted"><span>◌</span><small>OFF</small></div><div class="scene-device query-target"><span>◉</span><small>ON</small></div>',
-      '<div class="scene-device target"><span class="pulse"></span><span>2</span><small>LIGHTS ON</small></div>',
-      '<div class="scene-device answer"><span><b>2</b> lights are on.</span><small>READ-ONLY ANSWER</small></div>'
+    seekSteps: [
+      ['01', 'Query device state', 'Read each light before counting.'],
+      ['02', 'Aggregate the result', 'Two lights are on.'],
+      ['03', 'Answer read-only', 'Return the count without issuing control.']
     ]
   }
 };
+
+function sceneAppend(parent, name, attributes = {}, text = '') {
+  const element = svgElement(name, attributes, text);
+  parent.appendChild(element);
+  return element;
+}
+
+function addRoomFrame(svg, room) {
+  const scale = room.scale || 1;
+  const group = sceneAppend(svg, 'g', {
+    class: `scene-room room-${room.id}`,
+    transform: `translate(${room.x} ${room.y}) scale(${scale})`
+  });
+  sceneAppend(group, 'ellipse', { class: 'room-shadow', cx: 250, cy: 202, rx: 232, ry: 25 });
+  sceneAppend(group, 'path', { class: 'room-shell', d: 'M25 110 L250 194 L475 110 L475 126 L250 210 L25 126 Z' });
+  sceneAppend(group, 'polygon', { class: 'room-wall room-wall-left', points: '25,110 25,32 250,-48 250,30' });
+  sceneAppend(group, 'polygon', { class: 'room-wall room-wall-right', points: '250,30 250,-48 475,32 475,110' });
+  sceneAppend(group, 'polygon', { class: 'room-floor', points: '25,110 250,30 475,110 250,194' });
+  sceneAppend(group, 'path', { class: 'room-baseboard', d: 'M25 101 L250 21 M250 21 L475 101' });
+  sceneAppend(group, 'polygon', { class: 'room-window', points: '55,82 55,49 112,29 112,62' });
+  sceneAppend(group, 'polygon', { class: 'window-view', points: '60,76 60,53 107,36 107,59' });
+  sceneAppend(group, 'path', { class: 'window-landscape', d: 'M60 66 Q72 58 82 63 T107 55 V59 L60 76 Z' });
+  sceneAppend(group, 'path', { class: 'window-frame', d: 'M83 72 L83 39 M55 65 L112 45' });
+  sceneAppend(group, 'path', { class: 'window-curtains', d: 'M49 47 Q53 45 57 47 L57 79 L52 82 Z M111 25 Q116 24 119 27 L116 59 L110 62 Z' });
+  sceneAppend(group, 'path', { class: 'door-trim', d: 'M384 1 L450 25 V81 L384 57 Z' });
+  sceneAppend(group, 'polygon', { class: 'room-door', points: '390,4 444,24 444,74 390,55' });
+  sceneAppend(group, 'path', { class: 'door-panel', d: 'M396 12 L438 28 V65 L396 50 Z M402 19 L432 30 V46 L402 35 Z' });
+  sceneAppend(group, 'circle', { class: 'door-handle', cx: 433, cy: 51, r: 1.8 });
+  sceneAppend(group, 'polygon', { class: 'wall-art-frame', points: '150,8 190,-6 190,13 150,28' });
+  sceneAppend(group, 'polygon', { class: 'wall-art-print', points: '154,9 186,-2 186,10 154,22' });
+  sceneAppend(group, 'path', { class: 'wall-art-detail', d: 'M156 17 Q166 4 174 13 T184 5' });
+  sceneAppend(group, 'path', { class: 'room-wall-seam', d: 'M250 30 V-48' });
+  sceneAppend(group, 'text', { class: 'room-label', x: 302, y: 56 }, room.label);
+  sceneAppend(group, 'text', { class: 'room-code', x: 457, y: 95, 'text-anchor': 'end' }, room.code);
+  [
+    'M72 127 L250 64', 'M119 145 L250 99', 'M181 168 L250 143',
+    'M326 57 L428 94', 'M292 82 L394 120', 'M256 108 L357 146'
+  ].forEach((path) => sceneAppend(group, 'path', { class: 'floor-seam', d: path }));
+  return group;
+}
+
+function addLamp(group, id, x, y, state) {
+  const classes = ['scene-light'];
+  if (state.targets.has(id)) classes.push('is-target');
+  if (state.inspected.has(id)) classes.push('is-inspected');
+  const light = sceneAppend(group, 'g', {
+    class: classes.join(' '),
+    transform: `translate(${x} ${y})`,
+    'data-on': String(state.on.has(id)),
+    'aria-hidden': 'true'
+  });
+  sceneAppend(light, 'ellipse', { class: 'light-halo', cx: 1, cy: -14, rx: 39, ry: 27 });
+  sceneAppend(light, 'ellipse', { class: 'selection-halo', cx: 0, cy: -14, rx: 22, ry: 25 });
+  sceneAppend(light, 'ellipse', { class: 'lamp-base', cx: 0, cy: 0, rx: 12, ry: 3.5 });
+  sceneAppend(light, 'path', { class: 'lamp-arm', d: 'M0 -2 L2 -16 Q3 -22 2 -25' });
+  sceneAppend(light, 'circle', { class: 'lamp-joint', cx: 2, cy: -15, r: 2.5 });
+  sceneAppend(light, 'path', { class: 'lamp-shade', d: 'M-10 -25 L-14 -35 Q-14 -38 2 -38 Q18 -38 18 -35 L12 -25 Z' });
+  sceneAppend(light, 'circle', { class: 'lamp-bulb', cx: 2, cy: -25, r: 3 });
+  if (state.targets.has(id) || state.inspected.has(id)) {
+    sceneAppend(light, 'text', { class: 'device-state', x: 0, y: 14, 'text-anchor': 'middle' }, state.on.has(id) ? 'ON' : state.inspected.has(id) ? 'READ' : 'TARGET');
+  }
+  return light;
+}
+
+function addCeilingLight(group, id, x, y, state) {
+  const classes = ['scene-ceiling-light'];
+  if (state.targets.has(id)) classes.push('is-target');
+  if (state.inspected.has(id)) classes.push('is-inspected');
+  const light = sceneAppend(group, 'g', {
+    class: classes.join(' '),
+    transform: `translate(${x} ${y})`,
+    'data-on': String(state.on.has(id)),
+    'aria-hidden': 'true'
+  });
+  sceneAppend(light, 'ellipse', { class: 'light-halo', cx: 0, cy: 16, rx: 38, ry: 24 });
+  sceneAppend(light, 'ellipse', { class: 'selection-halo', cx: 0, cy: 14, rx: 22, ry: 17 });
+  sceneAppend(light, 'path', { class: 'pendant-cord', d: 'M0 -32 V-8' });
+  sceneAppend(light, 'path', { class: 'pendant-shade', d: 'M-18 -8 Q0 -17 18 -8 L12 2 H-12 Z' });
+  sceneAppend(light, 'circle', { class: 'pendant-bulb', cx: 0, cy: 0, r: 3.5 });
+  if (state.targets.has(id) || state.inspected.has(id)) {
+    sceneAppend(light, 'text', { class: 'device-state', x: 0, y: 30, 'text-anchor': 'middle' }, state.on.has(id) ? 'ON' : state.inspected.has(id) ? 'READ' : 'TARGET');
+  }
+  return light;
+}
+
+function addFan(group, x, y, occupied = false) {
+  const fan = sceneAppend(group, 'g', { class: 'scene-fan', transform: `translate(${x} ${y})`, 'aria-hidden': 'true' });
+  sceneAppend(fan, 'ellipse', { class: 'fan-outline', cx: 0, cy: 0, rx: 26, ry: 14 });
+  sceneAppend(fan, 'path', { class: 'fan-blades', d: 'M0 -2 C-8 -8 -29 -11 -31 -5 C-33 1 -11 3 0 1 C5 9 20 20 25 15 C30 10 12 -1 2 -3 C6 -12 7 -28 0 -29 C-7 -29 -6 -8 -1 0 C-12 3 -27 14 -23 20 C-19 26 -3 11 1 3 Z' });
+  sceneAppend(fan, 'circle', { class: 'fan-hub', cx: 0, cy: 0, r: 4 });
+  if (occupied) sceneAppend(fan, 'text', { class: 'fan-label', x: 0, y: 39, 'text-anchor': 'middle' }, 'UNCHANGED');
+  return fan;
+}
+
+function addOccupant(group, x, y) {
+  const person = sceneAppend(group, 'g', { class: 'scene-occupant', transform: `translate(${x} ${y})`, 'aria-hidden': 'true' });
+  sceneAppend(person, 'ellipse', { class: 'person-shadow', cx: 0, cy: 18, rx: 10, ry: 4 });
+  sceneAppend(person, 'circle', { class: 'person-head', cx: 0, cy: -1, r: 4.5 });
+  sceneAppend(person, 'path', { class: 'person-body', d: 'M-6 15 Q-5 4 0 4 Q5 4 6 15 L4 17 H-4 Z' });
+  sceneAppend(person, 'path', { class: 'person-legs', d: 'M-3 16 L-6 22 M3 16 L7 21' });
+  sceneAppend(person, 'text', { class: 'occupant-label', x: 10, y: 9 }, 'OCCUPIED');
+}
+
+function addSceneBadge(svg, x, y, eyebrow, label, kind = '') {
+  const badge = sceneAppend(svg, 'g', { class: `scene-badge ${kind}`.trim(), transform: `translate(${x} ${y})` });
+  const width = Math.max(174, Math.min(258, label.length * 6.4 + 24));
+  sceneAppend(badge, 'rect', { width, height: 42, rx: 10 });
+  sceneAppend(badge, 'text', { class: 'badge-eyebrow', x: 12, y: 15 }, eyebrow);
+  sceneAppend(badge, 'text', { class: 'badge-label', x: 12, y: 31 }, label);
+}
+
+function sceneState(family, step, mode) {
+  const state = { on: new Set(), targets: new Set(), inspected: new Set() };
+  const resolved = mode === 'SG' || step > 0;
+  const actionStep = mode === 'SG' ? 1 : 2;
+  if (family === 'DGC') {
+    if (resolved) state.targets.add('desk');
+    if (step >= actionStep) state.on.add('desk');
+  } else if (family === 'MSC') {
+    if (resolved) {
+      state.targets.add('living');
+      state.targets.add('bedside');
+    }
+    if (step >= actionStep) {
+      state.on.add('living');
+      state.on.add('bedside');
+    }
+  } else if (family === 'FAR') {
+    if (resolved) state.targets.add('kitchen');
+  } else if (family === 'DCR') {
+    if (resolved) state.targets.add('bedside');
+    if (step > 1) state.on.add('bedside');
+  } else if (family === 'PMU') {
+    if (resolved) state.targets.add('living');
+    if (step > 1) state.on.add('living');
+  } else if (family === 'REQ') {
+    if (mode === 'SG' || step > 0) {
+      state.on.add('living');
+      state.on.add('kitchen');
+    }
+    if (resolved) {
+      state.inspected.add('living');
+      state.inspected.add('kitchen');
+    }
+  }
+  return state;
+}
+
+function addWorkspaceFurniture(room, state) {
+  sceneAppend(room, 'ellipse', { class: 'furniture-shadow', cx: 164, cy: 143, rx: 112, ry: 21 });
+  sceneAppend(room, 'path', { class: 'desk-legs', d: 'M83 102 L83 145 M151 127 L151 160 M244 96 L244 135 M176 122 L176 156' });
+  sceneAppend(room, 'path', { class: 'desk-front', d: 'M78 86 L164 118 L164 131 L78 99 Z' });
+  sceneAppend(room, 'path', { class: 'desk-side', d: 'M164 118 L253 86 L253 99 L164 131 Z' });
+  sceneAppend(room, 'path', { class: 'desk-top', d: 'M78 86 L166 55 L253 86 L164 118 Z' });
+  sceneAppend(room, 'path', { class: 'monitor-shell', d: 'M127 50 L194 26 L194 72 L127 96 Z' });
+  sceneAppend(room, 'path', { class: 'monitor-screen', d: 'M133 53 L188 33 L188 68 L133 88 Z' });
+  sceneAppend(room, 'path', { class: 'monitor-content', d: 'M139 58 L160 50 M139 65 L178 51 M139 72 L168 62' });
+  sceneAppend(room, 'path', { class: 'monitor-glint', d: 'M138 55 L169 44' });
+  sceneAppend(room, 'path', { class: 'monitor-stand', d: 'M160 85 L160 99 M150 102 L171 94' });
+  sceneAppend(room, 'path', { class: 'keyboard-top', d: 'M174 96 L211 83 L230 90 L193 104 Z' });
+  sceneAppend(room, 'path', { class: 'keyboard-front', d: 'M193 104 L230 90 L230 94 L193 108 Z' });
+  sceneAppend(room, 'path', { class: 'keyboard-keys', d: 'M181 95 L207 86 M186 98 L212 89 M191 101 L217 92' });
+  sceneAppend(room, 'ellipse', { class: 'desk-mouse', cx: 238, cy: 91, rx: 4, ry: 2.5 });
+  sceneAppend(room, 'path', { class: 'desk-plant-leaves', d: 'M101 80 Q94 70 98 66 Q105 69 104 79 Q104 66 111 64 Q114 69 106 81 Q115 72 120 76 Q118 82 106 85' });
+  sceneAppend(room, 'path', { class: 'desk-plant-pot', d: 'M99 83 L112 79 L113 89 L101 93 Z' });
+  addLamp(room, 'desk', 227, 83, state);
+  addCeilingLight(room, 'ceiling-work', 286, 11, state);
+}
+
+function addLivingFurniture(room, state, occupied = false) {
+  sceneAppend(room, 'path', { class: 'rug', d: 'M73 119 L244 58 L411 120 L242 183 Z' });
+  sceneAppend(room, 'ellipse', { class: 'furniture-shadow', cx: 174, cy: 157, rx: 119, ry: 23 });
+  sceneAppend(room, 'path', { class: 'sofa-side', d: 'M67 103 L153 70 L153 116 L67 148 Z' });
+  sceneAppend(room, 'path', { class: 'sofa-back', d: 'M67 103 L67 78 L153 46 L153 70 Z M153 70 L153 46 L261 84 L261 109 Z' });
+  sceneAppend(room, 'path', { class: 'sofa-seat', d: 'M67 103 L153 70 L261 109 L174 143 Z' });
+  sceneAppend(room, 'path', { class: 'sofa-front', d: 'M67 103 L174 143 L174 164 L67 124 Z M174 143 L261 109 L261 130 L174 164 Z' });
+  sceneAppend(room, 'path', { class: 'sofa-cushion', d: 'M84 101 L145 78 L169 87 L108 111 Z' });
+  sceneAppend(room, 'path', { class: 'sofa-cushion', d: 'M158 77 L239 106 L217 116 L137 86 Z' });
+  sceneAppend(room, 'path', { class: 'sofa-stitching', d: 'M72 109 L174 148 L254 118 M154 75 L154 105' });
+  sceneAppend(room, 'path', { class: 'coffee-table-side', d: 'M267 122 L322 102 L322 111 L267 132 Z' });
+  sceneAppend(room, 'path', { class: 'coffee-table-front', d: 'M220 105 L267 122 L267 132 L220 115 Z' });
+  sceneAppend(room, 'path', { class: 'coffee-table-top', d: 'M220 105 L274 85 L322 102 L267 122 Z' });
+  sceneAppend(room, 'path', { class: 'table-book', d: 'M237 101 L256 94 L269 99 L250 107 Z M250 107 L269 99 L269 102 L250 110 Z' });
+  sceneAppend(room, 'ellipse', { class: 'table-cup', cx: 294, cy: 101, rx: 5, ry: 2.4 });
+  sceneAppend(room, 'path', { class: 'table-cup-side', d: 'M289 101 L290 107 Q294 110 298 105 L299 101 M298 102 Q304 101 301 106' });
+  sceneAppend(room, 'path', { class: 'table-leg', d: 'M230 117 L230 139 M309 108 L309 128 M276 133 L276 150' });
+  sceneAppend(room, 'path', { class: 'side-table-top', d: 'M351 116 L393 101 L420 111 L378 127 Z' });
+  sceneAppend(room, 'path', { class: 'side-table-front', d: 'M351 116 L378 127 L378 138 L351 127 Z M378 127 L420 111 L420 122 L378 138 Z' });
+  addLamp(room, 'living', 389, 100, state);
+  addFan(room, 325, 32, occupied);
+  if (occupied) addOccupant(room, 291, 142);
+}
+
+function addBedroomFurniture(room, state, occupied = false) {
+  sceneAppend(room, 'path', { class: 'rug bedroom-rug', d: 'M56 121 L225 61 L397 123 L228 185 Z' });
+  sceneAppend(room, 'ellipse', { class: 'furniture-shadow', cx: 187, cy: 159, rx: 128, ry: 22 });
+  sceneAppend(room, 'path', { class: 'bed-side', d: 'M76 93 L177 56 L177 150 L76 112 Z' });
+  sceneAppend(room, 'path', { class: 'bed-front', d: 'M177 150 L292 108 L292 133 L177 176 Z' });
+  sceneAppend(room, 'path', { class: 'bed-frame', d: 'M76 93 L177 56 L292 98 L177 139 Z' });
+  sceneAppend(room, 'path', { class: 'bed-cover', d: 'M82 94 L177 60 L282 99 L186 134 Z' });
+  sceneAppend(room, 'path', { class: 'bed-throw', d: 'M186 101 L282 99 L282 113 L186 148 Z' });
+  sceneAppend(room, 'path', { class: 'bed-folds', d: 'M178 64 L176 124 M192 69 L190 119 M204 74 L202 115' });
+  sceneAppend(room, 'path', { class: 'bed-pillow', d: 'M91 88 L133 73 L161 83 L119 99 Z' });
+  sceneAppend(room, 'path', { class: 'bed-pillow', d: 'M137 72 L169 61 L198 72 L166 84 Z' });
+  sceneAppend(room, 'path', { class: 'bed-stitching', d: 'M199 136 L278 108 M196 141 L273 114' });
+  sceneAppend(room, 'path', { class: 'nightstand-front', d: 'M335 112 L369 124 L369 148 L335 136 Z' });
+  sceneAppend(room, 'path', { class: 'nightstand-side', d: 'M369 124 L411 109 L411 134 L369 148 Z' });
+  sceneAppend(room, 'path', { class: 'nightstand-top', d: 'M335 112 L377 97 L411 109 L369 124 Z' });
+  sceneAppend(room, 'path', { class: 'nightstand-drawer', d: 'M343 119 L361 126 L361 132 L343 126 Z' });
+  sceneAppend(room, 'circle', { class: 'nightstand-knob', cx: 354, cy: 127, r: 1.5 });
+  addLamp(room, 'bedside', 378, 95, state);
+  addCeilingLight(room, 'ceiling-bedroom', 275, 11, state);
+  if (occupied) addOccupant(room, 318, 151);
+}
+
+function addKitchenFurniture(room, state) {
+  sceneAppend(room, 'ellipse', { class: 'furniture-shadow', cx: 192, cy: 157, rx: 140, ry: 21 });
+  sceneAppend(room, 'path', { class: 'backsplash', d: 'M57 53 L143 22 L228 53 L228 69 L143 38 L57 69 Z' });
+  sceneAppend(room, 'path', { class: 'backsplash-grout', d: 'M86 59 L86 41 M114 48 L114 31 M143 54 V36 M172 47 V29 M200 58 V42 M67 58 L152 28 M96 68 L181 38 M126 78 L211 48' });
+  sceneAppend(room, 'path', { class: 'counter-front', d: 'M48 91 L141 125 L141 155 L48 120 Z' });
+  sceneAppend(room, 'path', { class: 'counter-side', d: 'M141 125 L237 90 L237 120 L141 155 Z' });
+  sceneAppend(room, 'path', { class: 'counter-top', d: 'M48 91 L144 56 L237 90 L141 125 Z' });
+  sceneAppend(room, 'path', { class: 'cabinet-door', d: 'M57 111 L92 124 L92 145 L57 132 Z M101 127 L133 139 L133 151 L101 139 Z' });
+  sceneAppend(room, 'path', { class: 'cabinet-side', d: 'M149 122 L226 94 L226 119 L149 148 Z' });
+  sceneAppend(room, 'path', { class: 'sink-rim', d: 'M73 85 L111 71 L133 79 L95 93 Z' });
+  sceneAppend(room, 'path', { class: 'sink-basin', d: 'M80 85 L111 74 L126 80 L96 91 Z' });
+  sceneAppend(room, 'path', { class: 'sink-faucet', d: 'M105 74 V65 Q105 60 111 60 H115 V69' });
+  sceneAppend(room, 'circle', { class: 'sink-handle', cx: 118, cy: 69, r: 1.4 });
+  sceneAppend(room, 'path', { class: 'stove-top', d: 'M161 77 L204 61 L225 69 L182 85 Z' });
+  sceneAppend(room, 'circle', { class: 'stove-burner', cx: 183, cy: 72, r: 4 });
+  sceneAppend(room, 'circle', { class: 'stove-burner', cx: 204, cy: 68, r: 4 });
+  sceneAppend(room, 'path', { class: 'island-front', d: 'M259 117 L330 143 L330 164 L259 138 Z' });
+  sceneAppend(room, 'path', { class: 'island-side', d: 'M330 143 L420 110 L420 132 L330 164 Z' });
+  sceneAppend(room, 'path', { class: 'island-top', d: 'M259 117 L348 84 L420 110 L330 143 Z' });
+  sceneAppend(room, 'path', { class: 'island-detail', d: 'M276 122 L315 137 M367 110 L402 118' });
+  addCeilingLight(room, 'kitchen', 272, 11, state);
+}
+
+function renderHomeScene(family, step, mode) {
+  const task = taskData[family];
+  const steps = mode === 'SS' ? task.seekSteps : task.steps;
+  const currentStep = steps[step];
+  const state = sceneState(family, step, mode);
+  const focusRoom = { DGC: 'workspace', AIR: 'living', FAR: 'kitchen', DCR: 'bedroom', PMU: 'living' }[family];
+  const pairedRooms = { MSC: ['living', 'bedroom'], REQ: ['living', 'kitchen'] }[family];
+  const compactViewport = window.matchMedia('(max-width: 600px)').matches;
+  const compactPair = Boolean(pairedRooms && compactViewport);
+  const viewBox = focusRoom
+    ? '170 30 950 580'
+    : compactPair ? '0 0 1000 900' : '0 0 1200 370';
+  const viewHeight = compactPair ? 900 : focusRoom ? 620 : 370;
+  const svg = svgElement('svg', {
+    class: `home-scene family-${family.toLowerCase()}${focusRoom ? ' is-focused' : ''}${pairedRooms ? ' is-paired' : ''}${compactViewport ? ' is-mobile-layout' : ''}${mode === 'SS' ? ` is-seeking${step === 0 ? ' pre-query' : ''}` : ''}`,
+    viewBox,
+    role: 'img',
+    'aria-label': `${task.title}, ${mode === 'SG' ? 'state supplied' : step === 0 ? 'state not queried' : 'tool state returned'}: ${currentStep[1].toLowerCase()}`
+  });
+  sceneAppend(svg, 'title', {}, `${task.title} walkthrough`);
+  sceneAppend(svg, 'desc', {}, 'A perspective cutaway home scene shows room occupancy, lights, furniture, and the device changes relevant to this task.');
+  const backdrop = sceneAppend(svg, 'defs');
+  const backgroundGlow = sceneAppend(backdrop, 'radialGradient', { id: 'home-glow', cx: '80%', cy: '18%', r: '80%' });
+  sceneAppend(backgroundGlow, 'stop', { offset: '0%', 'stop-color': '#403343', 'stop-opacity': '.38' });
+  sceneAppend(backgroundGlow, 'stop', { offset: '100%', 'stop-color': '#111014', 'stop-opacity': '0' });
+  const wallGradient = sceneAppend(backdrop, 'linearGradient', { id: 'wall-soft', x1: '0', x2: '1', y1: '0', y2: '1' });
+  sceneAppend(wallGradient, 'stop', { offset: '0%', 'stop-color': '#302b2d' });
+  sceneAppend(wallGradient, 'stop', { offset: '100%', 'stop-color': '#1b191b' });
+  const sideWallGradient = sceneAppend(backdrop, 'linearGradient', { id: 'wall-deep', x1: '0', x2: '1', y1: '0', y2: '1' });
+  sceneAppend(sideWallGradient, 'stop', { offset: '0%', 'stop-color': '#211f22' });
+  sceneAppend(sideWallGradient, 'stop', { offset: '100%', 'stop-color': '#151416' });
+  const floorGradient = sceneAppend(backdrop, 'linearGradient', { id: 'floor-wood', x1: '0', x2: '0', y1: '0', y2: '1' });
+  sceneAppend(floorGradient, 'stop', { offset: '0%', 'stop-color': '#4a4140' });
+  sceneAppend(floorGradient, 'stop', { offset: '100%', 'stop-color': '#282426' });
+  const windowGradient = sceneAppend(backdrop, 'linearGradient', { id: 'window-glass', x1: '0', x2: '0', y1: '0', y2: '1' });
+  sceneAppend(windowGradient, 'stop', { offset: '0%', 'stop-color': '#766f79' });
+  sceneAppend(windowGradient, 'stop', { offset: '58%', 'stop-color': '#a58c7d' });
+  sceneAppend(windowGradient, 'stop', { offset: '100%', 'stop-color': '#665b5d' });
+  const doorGradient = sceneAppend(backdrop, 'linearGradient', { id: 'door-wood', x1: '0', x2: '1', y1: '0', y2: '1' });
+  sceneAppend(doorGradient, 'stop', { offset: '0%', 'stop-color': '#725a4b' });
+  sceneAppend(doorGradient, 'stop', { offset: '100%', 'stop-color': '#3a302e' });
+  const artGradient = sceneAppend(backdrop, 'linearGradient', { id: 'art-print', x1: '0', x2: '1', y1: '0', y2: '1' });
+  sceneAppend(artGradient, 'stop', { offset: '0%', 'stop-color': '#927b70' });
+  sceneAppend(artGradient, 'stop', { offset: '100%', 'stop-color': '#554b57' });
+  const fabricGradient = sceneAppend(backdrop, 'linearGradient', { id: 'sofa-fabric', x1: '0', x2: '0', y1: '0', y2: '1' });
+  sceneAppend(fabricGradient, 'stop', { offset: '0%', 'stop-color': '#77717a' });
+  sceneAppend(fabricGradient, 'stop', { offset: '100%', 'stop-color': '#39363d' });
+  const bedGradient = sceneAppend(backdrop, 'linearGradient', { id: 'bed-cover', x1: '0', x2: '1', y1: '0', y2: '1' });
+  sceneAppend(bedGradient, 'stop', { offset: '0%', 'stop-color': '#8b8190' });
+  sceneAppend(bedGradient, 'stop', { offset: '100%', 'stop-color': '#514c5a' });
+  const tileGradient = sceneAppend(backdrop, 'linearGradient', { id: 'tile-surface', x1: '0', x2: '0', y1: '0', y2: '1' });
+  sceneAppend(tileGradient, 'stop', { offset: '0%', 'stop-color': '#716861' });
+  sceneAppend(tileGradient, 'stop', { offset: '100%', 'stop-color': '#514b49' });
+  const woodGradient = sceneAppend(backdrop, 'linearGradient', { id: 'wood-surface', x1: '0', x2: '1', y1: '0', y2: '1' });
+  sceneAppend(woodGradient, 'stop', { offset: '0%', 'stop-color': '#876e5c' });
+  sceneAppend(woodGradient, 'stop', { offset: '100%', 'stop-color': '#493a33' });
+  const screenGradient = sceneAppend(backdrop, 'linearGradient', { id: 'screen-light', x1: '0', x2: '1', y1: '0', y2: '1' });
+  sceneAppend(screenGradient, 'stop', { offset: '0%', 'stop-color': '#5d7887' });
+  sceneAppend(screenGradient, 'stop', { offset: '100%', 'stop-color': '#1c2630' });
+  const warmGradient = sceneAppend(backdrop, 'radialGradient', { id: 'lamp-warmth' });
+  sceneAppend(warmGradient, 'stop', { offset: '0%', 'stop-color': '#ffd995', 'stop-opacity': '.78' });
+  sceneAppend(warmGradient, 'stop', { offset: '100%', 'stop-color': '#ffb866', 'stop-opacity': '0' });
+  const shadow = sceneAppend(backdrop, 'filter', { id: 'soft-shadow', x: '-40%', y: '-40%', width: '180%', height: '190%' });
+  sceneAppend(shadow, 'feGaussianBlur', { in: 'SourceAlpha', stdDeviation: 3, result: 'blur' });
+  sceneAppend(shadow, 'feOffset', { in: 'blur', dx: 1, dy: 4, result: 'offset' });
+  const shadowMerge = sceneAppend(shadow, 'feMerge');
+  sceneAppend(shadowMerge, 'feMergeNode', { in: 'offset' });
+  sceneAppend(shadowMerge, 'feMergeNode', { in: 'SourceGraphic' });
+
+  sceneAppend(svg, 'rect', { class: 'scene-backdrop', width: 1200, height: viewHeight, rx: 14 });
+  sceneAppend(svg, 'rect', { class: 'scene-backdrop-glow', width: 1200, height: viewHeight, rx: 14 });
+
+  const roomSpecs = {
+    workspace: { label: 'WORKSPACE', code: '01', x: 42, y: 100 },
+    living: { label: 'LIVING ROOM', code: '02', x: 654, y: 100 },
+    bedroom: { label: 'BEDROOM', code: '03', x: 42, y: 330 },
+    kitchen: { label: 'KITCHEN', code: '04', x: 654, y: 330 }
+  };
+  const roomIds = focusRoom ? [focusRoom] : pairedRooms || Object.keys(roomSpecs);
+  const rooms = {};
+  roomIds.forEach((id) => {
+    let position = roomSpecs[id];
+    if (focusRoom) position = { x: 155, y: 148, scale: 1.95 };
+    else if (pairedRooms && compactPair) {
+      position = { x: 100, y: id === pairedRooms[0] ? 80 : 520, scale: 1.6 };
+    } else if (pairedRooms) {
+      position = { x: id === pairedRooms[0] ? 5 : 605, y: 68, scale: 1.25 };
+    }
+    rooms[id] = addRoomFrame(svg, { id, ...roomSpecs[id], ...position });
+  });
+
+  if (rooms.workspace) addWorkspaceFurniture(rooms.workspace, state);
+  if (rooms.living) addLivingFurniture(rooms.living, state, family === 'MSC' && (mode === 'SG' || step > 0));
+  if (rooms.bedroom) addBedroomFurniture(rooms.bedroom, state, family === 'MSC' && (mode === 'SG' || step > 0));
+  if (rooms.kitchen) addKitchenFurniture(rooms.kitchen, state);
+
+  const badge = (eyebrow, label, kind = '') => addSceneBadge(svg, 870, 8, eyebrow, label, kind);
+  if (family === 'AIR' && step === 1) badge('CLARIFICATION', 'Which room should I adjust?', 'question');
+  if (family === 'AIR' && step === 2) badge('WAITING FOR DETAILS', 'No device changed', 'question');
+  if (family === 'FAR' && step === 1) badge('RULE SAVED', 'Mon–Fri · 07:00', 'automation');
+  if (family === 'FAR' && step === 2) badge('FUTURE ACTION', 'Kitchen light on', 'automation');
+  if (family === 'DCR' && step === 1) badge('LATEST CORRECTION', 'Bedroom lamp', 'correction');
+  if (family === 'DCR' && step === 2) badge('ACTION EXECUTED ONCE', 'Bedroom lamp on', 'correction');
+  if (family === 'PMU' && (mode === 'SG' || step > 0) && step < 2) badge('EVENING PREFERENCE', 'Warm white · 40%', 'memory');
+  if (family === 'PMU' && step === 2) badge('PREFERENCE APPLIED', 'Warm white · 40%', 'memory');
+  if (family === 'REQ' && step > 0) badge('READ-ONLY RESULT', '2 lights are on', 'answer');
+
+  sceneItems.replaceChildren(svg);
+}
 
 const taskRows = document.querySelectorAll('.task-row');
 const taskDemo = document.querySelector('.task-demo');
 const taskTitle = document.getElementById('task-demo-title');
 const taskPrompt = document.getElementById('task-prompt');
-const taskSuccess = document.getElementById('task-success-copy');
 const walkSteps = document.getElementById('walk-steps');
 const sceneItems = document.getElementById('scene-items');
-const sceneCaption = document.getElementById('scene-caption');
+const sceneMode = document.getElementById('scene-mode');
 const walkCounter = document.getElementById('walk-counter');
-const walkTitle = document.getElementById('walk-step-title');
 const walkCopy = document.getElementById('walk-step-copy');
 const walkToggle = document.getElementById('walk-toggle');
-const processTrack = document.querySelector('.process-track');
-const processNodes = document.querySelectorAll('.process-node');
+const walkPrevious = document.getElementById('walk-prev');
+const walkNext = document.getElementById('walk-next');
 const interfaceButtons = document.querySelectorAll('.interface-button');
-const interfaceNote = document.getElementById('interface-note');
-const taskMapNodes = document.querySelectorAll('.task-map-node');
-const taskMapReadoutTitle = document.getElementById('task-map-readout-title');
-const taskMapReadoutCopy = document.getElementById('task-map-readout-copy');
-const taskStageMap = {
-  DGC: ['resolve', 'act', 'score'],
-  MSC: ['resolve', 'act', 'score'],
-  AIR: ['observe', 'act', 'score'],
-  FAR: ['resolve', 'act', 'score'],
-  DCR: ['observe', 'resolve', 'act'],
-  PMU: ['observe', 'resolve', 'act'],
-  REQ: ['observe', 'resolve', 'score']
-};
-const interfaceCopy = {
-  SG: 'State-Given supplies the relevant context before the model responds.',
-  SS: 'State-Seeking begins with partial observation and adds a query-and-act loop.'
-};
 let activeFamily = 'DGC';
 let activeStep = 0;
+let activeInterface = 'SG';
 let walkTimer;
-let walkPaused = false;
+const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+const mobileScenePreference = window.matchMedia('(max-width: 600px)');
+let walkPaused = motionPreference.matches;
+const motionPreferenceListener = (event) => {
+  walkPaused = event.matches;
+  syncWalkToggle();
+  updateTaskStep();
+  restartWalk();
+};
+
+function currentTaskSteps() {
+  const task = taskData[activeFamily];
+  return activeInterface === 'SS' ? task.seekSteps : task.steps;
+}
+
+function syncWalkToggle() {
+  walkToggle.textContent = walkPaused ? 'Play' : 'Pause';
+  walkToggle.setAttribute('aria-label', `${walkPaused ? 'Play' : 'Pause'} walkthrough`);
+  walkToggle.setAttribute('aria-pressed', String(!walkPaused));
+}
+
+function updatePlaybackControls() {
+  walkPrevious.disabled = activeStep === 0;
+  walkNext.disabled = activeStep === currentTaskSteps().length - 1;
+}
 
 function renderTask(family, resetStep = true) {
   const task = taskData[family];
@@ -524,15 +864,23 @@ function renderTask(family, resetStep = true) {
   taskDemo.classList.add('switching');
   taskTitle.textContent = task.title;
   taskPrompt.textContent = task.prompt;
-  taskSuccess.textContent = task.success;
-  sceneCaption.textContent = task.caption;
-  updateTaskMap();
+  syncWalkToggle();
   walkSteps.replaceChildren();
-  task.steps.forEach((step, index) => {
-    const marker = document.createElement('span');
+  currentTaskSteps().forEach((step, index) => {
+    const marker = document.createElement('button');
     marker.className = 'walk-step';
+    marker.type = 'button';
     marker.dataset.step = index;
-    marker.setAttribute('aria-label', `Step ${index + 1}: ${step[1]}`);
+    const markerNumber = document.createElement('span');
+    markerNumber.className = 'walk-step-number';
+    markerNumber.textContent = String(index + 1).padStart(2, '0');
+    const markerLabel = document.createElement('span');
+    markerLabel.className = 'walk-step-label';
+    markerLabel.textContent = step[1];
+    marker.append(markerNumber, markerLabel);
+    marker.title = step[1];
+    marker.setAttribute('aria-label', `Go to step ${index + 1}: ${step[1]}`);
+    marker.addEventListener('click', () => setTaskStep(index));
     walkSteps.appendChild(marker);
   });
   updateTaskStep();
@@ -541,62 +889,67 @@ function renderTask(family, resetStep = true) {
 
 function updateTaskStep() {
   const task = taskData[activeFamily];
-  const step = task.steps[activeStep];
+  const steps = currentTaskSteps();
+  const step = steps[activeStep];
+  walkSteps.dataset.paused = String(walkPaused);
   walkSteps.querySelectorAll('.walk-step').forEach((marker, index) => {
     marker.classList.toggle('done', index < activeStep);
-    marker.classList.toggle('current', index === activeStep && !walkPaused);
+    marker.classList.toggle('current', index === activeStep);
+    if (index === activeStep) marker.setAttribute('aria-current', 'step');
+    else marker.removeAttribute('aria-current');
   });
-  sceneItems.innerHTML = task.scenes[activeStep];
-  walkCounter.textContent = `STEP ${step[0]} / ${task.steps.length}`;
-  walkTitle.textContent = step[1];
+  sceneMode.textContent = activeInterface === 'SG'
+    ? 'Context supplied'
+    : activeStep === 0 ? 'State not queried' : 'State queried';
+  renderHomeScene(activeFamily, activeStep, activeInterface);
+  walkCounter.textContent = `Step ${activeStep + 1} of ${steps.length}`;
   walkCopy.textContent = step[2];
-  const rawStage = taskStageMap[activeFamily][activeStep];
-  const activeStage = processTrack.dataset.interface === 'SG' && rawStage === 'observe' ? 'resolve' : rawStage;
-  processNodes.forEach((node) => {
-    const stage = node.dataset.stage;
-    const stageIndex = ['request', 'observe', 'resolve', 'act', 'score'].indexOf(stage);
-    const activeIndex = ['request', 'observe', 'resolve', 'act', 'score'].indexOf(activeStage);
-    node.classList.toggle('current', stage === activeStage);
-    node.classList.toggle('complete', stageIndex >= 0 && stageIndex < activeIndex);
-  });
+  updatePlaybackControls();
+}
+
+function setTaskStep(step) {
+  const lastStep = currentTaskSteps().length - 1;
+  activeStep = Math.max(0, Math.min(lastStep, step));
+  updateTaskStep();
+  restartWalk();
 }
 
 function restartWalk() {
   window.clearInterval(walkTimer);
   if (walkPaused) return;
   walkTimer = window.setInterval(() => {
-    activeStep = (activeStep + 1) % taskData[activeFamily].steps.length;
+    activeStep = (activeStep + 1) % currentTaskSteps().length;
     updateTaskStep();
-  }, 3600);
+  }, 5200);
 }
 
 taskRows.forEach((row) => {
   row.addEventListener('click', () => renderTask(row.dataset.family));
 });
+walkPrevious.addEventListener('click', () => setTaskStep(activeStep - 1));
+walkNext.addEventListener('click', () => setTaskStep(activeStep + 1));
 walkToggle.addEventListener('click', () => {
   walkPaused = !walkPaused;
-  walkToggle.setAttribute('aria-pressed', String(!walkPaused));
-  walkToggle.textContent = walkPaused ? 'Play animation' : 'Pause animation';
+  syncWalkToggle();
   updateTaskStep();
   restartWalk();
 });
 
-function setInterface(mode) {
-  processTrack.dataset.interface = mode;
-  interfaceButtons.forEach((button) => {
-    button.classList.toggle('active', button.dataset.interface === mode);
-  });
-  interfaceNote.textContent = interfaceCopy[mode];
-  updateTaskStep();
-}
+if (motionPreference.addEventListener) motionPreference.addEventListener('change', motionPreferenceListener);
+else motionPreference.addListener(motionPreferenceListener);
+const mobileSceneListener = () => renderHomeScene(activeFamily, activeStep, activeInterface);
+if (mobileScenePreference.addEventListener) mobileScenePreference.addEventListener('change', mobileSceneListener);
+else mobileScenePreference.addListener(mobileSceneListener);
 
-function updateTaskMap() {
-  const task = taskData[activeFamily];
-  taskMapNodes.forEach((node) => {
-    node.classList.toggle('selected', node.dataset.family === activeFamily);
+function setInterface(mode) {
+  activeInterface = mode;
+  activeStep = 0;
+  interfaceButtons.forEach((button) => {
+    const selected = button.dataset.interface === mode;
+    button.classList.toggle('active', selected);
+    button.setAttribute('aria-pressed', String(selected));
   });
-  if (taskMapReadoutTitle) taskMapReadoutTitle.textContent = `${activeFamily} · ${task.title}`;
-  if (taskMapReadoutCopy) taskMapReadoutCopy.textContent = task.steps[0][2];
+  renderTask(activeFamily, false);
 }
 
 interfaceButtons.forEach((button) => {
@@ -611,29 +964,11 @@ landscapeMetricButtons.forEach((button) => {
   });
 });
 
-languageMetricButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    languageMetric = button.dataset.languageMetric;
-    languageMetricButtons.forEach((item) => item.classList.toggle('active', item === button));
-    renderLanguageChart(loadedBandSummary, languageMetric);
-  });
-});
-
 gapFilterButtons.forEach((button) => {
   button.addEventListener('click', () => {
     gapFilter = button.dataset.gapFilter;
     gapFilterButtons.forEach((item) => item.classList.toggle('active', item === button));
     renderGapChart(loadedModels, gapFilter);
-  });
-});
-
-taskMapNodes.forEach((node) => {
-  node.addEventListener('click', () => renderTask(node.dataset.family));
-  node.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      renderTask(node.dataset.family);
-    }
   });
 });
 

@@ -6,7 +6,7 @@
 
 **EdgeBench** is an extensible benchmark suite for evaluating language models as agents in practical environments. **EdgeBench-Home** is the first benchmark in the suite, focused on bilingual smart-home tasks.
 
-[Website](https://chico-future.github.io/EdgeBench/) · [Dataset on Hugging Face](https://huggingface.co/datasets/chico-research/EdgeBench-Home) · [Home benchmark guide](benchmarks/home/README.md)
+[Website](https://chico-future.github.io/EdgeBench/) · [EdgeBench-Home website](https://chico-future.github.io/EdgeBench/home/) · [Dataset on Hugging Face](https://huggingface.co/datasets/chico-research/EdgeBench-Home) · [Home benchmark guide](benchmarks/home/README.md)
 
 ## What is included
 
