@@ -342,11 +342,11 @@
       "n_language_cases": 420,
       "state_given_by_language": {
         "Chinese": 0,
-        "English": 0
+        "English": 1.2
       },
       "state_seeking_by_language": {
         "Chinese": 0,
-        "English": 1.2
+        "English": 0
       }
     },
     {

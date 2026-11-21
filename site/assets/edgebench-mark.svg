@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" viewBox="160 70 930 930" role="img" aria-labelledby="title"><ns0:title id="title">EdgeBench</ns0:title><ns0:defs>
+    <ns0:linearGradient id="silver-top" x1="0" y1="0" x2="1" y2=".6">
+      <ns0:stop offset="0" stop-color="#aeb6c5" />
+      <ns0:stop offset=".32" stop-color="#c9cfdb" />
+      <ns0:stop offset=".66" stop-color="#e9edf4" />
+      <ns0:stop offset=".88" stop-color="#f8fafc" />
+      <ns0:stop offset="1" stop-color="#d9dfe8" />
+    </ns0:linearGradient>
+    <ns0:radialGradient id="top-sheen" cx="78%" cy="16%" r="90%">
+      <ns0:stop offset="0" stop-color="#fff" stop-opacity=".42" />
+      <ns0:stop offset=".58" stop-color="#fff" stop-opacity=".13" />
+      <ns0:stop offset="1" stop-color="#fff" stop-opacity="0" />
+    </ns0:radialGradient>
+    <ns0:linearGradient id="silver-fold" x1="0" y1="0" x2=".78" y2="1">
+      <ns0:stop offset="0" stop-color="#aeb7c7" />
+      <ns0:stop offset=".42" stop-color="#8993a4" />
+      <ns0:stop offset=".76" stop-color="#697383" />
+      <ns0:stop offset="1" stop-color="#a7afbe" />
+    </ns0:linearGradient>
+    <ns0:linearGradient id="dark-fold" gradientUnits="userSpaceOnUse" x1="190" y1="578.5" x2="1060" y2="484.5">
+      <ns0:stop offset="0" stop-color="#252d39" />
+      <ns0:stop offset=".38" stop-color="#1e2631" />
+      <ns0:stop offset=".72" stop-color="#333d4c" />
+      <ns0:stop offset="1" stop-color="#596273" />
+    </ns0:linearGradient>
+    <ns0:linearGradient id="silver-bottom" x1="0" y1=".35" x2="1" y2=".8">
+      <ns0:stop offset="0" stop-color="#697383" />
+      <ns0:stop offset=".36" stop-color="#8b95a5" />
+      <ns0:stop offset=".72" stop-color="#b8c0cd" />
+      <ns0:stop offset="1" stop-color="#788292" />
+    </ns0:linearGradient>
+    <ns0:radialGradient id="bottom-sheen" cx="68%" cy="56%" r="76%">
+      <ns0:stop offset="0" stop-color="#fff" stop-opacity=".18" />
+      <ns0:stop offset=".7" stop-color="#fff" stop-opacity=".045" />
+      <ns0:stop offset="1" stop-color="#fff" stop-opacity="0" />
+    </ns0:radialGradient>
+    <ns0:linearGradient id="edge-metal" x1="0" y1="0" x2="1" y2="1">
+      <ns0:stop offset="0" stop-color="#f8faff" stop-opacity=".76" />
+      <ns0:stop offset=".52" stop-color="#667184" stop-opacity=".48" />
+      <ns0:stop offset="1" stop-color="#fff" stop-opacity=".72" />
+    </ns0:linearGradient>
+    <ns0:filter id="soft-shadow" x="-8%" y="-8%" width="116%" height="120%" color-interpolation-filters="sRGB">
+      <ns0:feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#111a27" flood-opacity=".12" />
+    </ns0:filter>
+    <ns0:filter id="crease-blur" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <ns0:feGaussianBlur stdDeviation="2.4" />
+    </ns0:filter>
+  </ns0:defs>
+
+  <ns0:g id="folded-mark" filter="url(#soft-shadow)" stroke-linejoin="round" stroke-linecap="round">
+
+
+    <ns0:g id="lower-trapezoid">
+    <ns0:path id="lower-page" d="M 649.4 558.7       L 1025.2 770.4 Q 1060 790 1023.4 806       L 669 960.8 Q 625 980 581 960.8       L 190 790 L 614.5 550.9 L 625 545 Z" fill="url(#silver-bottom)" />
+    <ns0:path d="M 649.4 558.7       L 1025.2 770.4 Q 1060 790 1023.4 806       L 669 960.8 Q 625 980 581 960.8       L 190 790 L 614.5 550.9 L 625 545 Z" fill="url(#bottom-sheen)" />
+    <ns0:path d="M 649.4 558.7 L 1025.2 770.4 Q 1060 790 1023.4 806       L 669 960.8 Q 625 980 581 960.8 L 190 790       L 614.5 550.9 L 625 545 Z" fill="none" stroke="url(#edge-metal)" stroke-opacity=".66" stroke-width="2.2" />
+    </ns0:g>
+
+
+    <ns0:g id="middle-triangle">
+    <ns0:path id="center-fold" d="M 190 320       L 1031.1 547 Q 1060 555 1031.1 563       L 190 790 Z" fill="url(#dark-fold)" />
+
+    <ns0:path d="M 190 320       L 1031.1 547 Q 1060 555 1031.1 563       L 190 790 Z" fill="none" stroke="#b6bfce" stroke-opacity=".2" stroke-width="1.5" />
+    </ns0:g>
+
+
+    <ns0:path id="left-fold" d="M 190 320 L 625 545 L 190 790 Z" fill="url(#dark-fold)" />
+
+
+    <ns0:g id="upper-trapezoid">
+    <ns0:path id="upper-page" d="M 190 320 L 590 113       Q 625 95 660 113 L 1026.3 302.6       Q 1060 320 1026.3 337.4 L 625 545 Z" fill="url(#silver-top)" />
+    <ns0:path d="M 190 320 L 590 113       Q 625 95 660 113 L 1026.3 302.6       Q 1060 320 1026.3 337.4 L 625 545 Z" fill="url(#top-sheen)" />
+
+
+    <ns0:path d="M 190 320 L 590 113 Q 625 95 660 113       L 1026.3 302.6 Q 1060 320 1026.3 337.4 L 625 545 Z" fill="none" stroke="url(#edge-metal)" stroke-width="2.4" />
+    </ns0:g>
+
+
+    <ns0:path d="M 190 320 L 625 545" fill="none" stroke="#17202c" stroke-opacity=".24" stroke-width="4" filter="url(#crease-blur)" />
+    <ns0:path d="M 190 320 L 625 545" fill="none" stroke="#273241" stroke-opacity=".26" stroke-width="2.2" />
+    <ns0:path d="M 625 545 L 190 790" fill="none" stroke="#17202c" stroke-opacity=".28" stroke-width="3" />
+    <ns0:path d="M 622 542 L 194 786" fill="none" stroke="#edf1f7" stroke-opacity=".28" stroke-width="1.2" />
+    <ns0:path d="M 190 320 L 190 790" fill="none" stroke="#e9edf4" stroke-opacity=".55" stroke-width="2" />
+  </ns0:g>
+
+  </ns0:svg>

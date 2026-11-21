@@ -6,7 +6,7 @@
 
 **EdgeBench** is an extensible benchmark suite for evaluating language models as agents in practical environments. **EdgeBench-Home** is the first benchmark in the suite, focused on bilingual smart-home tasks.
 
-[Website](https://chico-future.github.io/EdgeBench/) · [EdgeBench-Home website](https://chico-future.github.io/EdgeBench/home/) · [Dataset on Hugging Face](https://huggingface.co/datasets/chico-research/EdgeBench-Home) · [Home benchmark guide](benchmarks/home/README.md)
+[Website](https://chico-future.github.io/EdgeBench/) · [EdgeBench-Home website](https://chico-future.github.io/EdgeBench/home/) · [Submit results](https://chico-future.github.io/EdgeBench/home/#submit-results) · [Dataset on Hugging Face](https://huggingface.co/datasets/chico-research/EdgeBench-Home) · [Home benchmark guide](benchmarks/home/README.md)
 
 ## What is included
 
@@ -104,6 +104,12 @@ Future domains should be added under `benchmarks/<domain>/` with their own regis
 Record the EdgeBench commit, EdgeBench-Home dataset revision, model identifier and revision, language, interface, generation settings, context and output limits, and AIR review configuration. Keep generated predictions and reports outside version control.
 
 The scorer reports incomplete coverage and pending AIR reviews explicitly. Do not treat a subset score as a full benchmark result.
+
+## Submit results
+
+After scoring a run, use the [Email results](https://chico-future.github.io/EdgeBench/home/#submit-results) link on the EdgeBench-Home page to open a pre-addressed email to **yiliu.li@chico-future.com**. GitHub Pages is a static site, so it does not upload or store results. Attach `report.md` and `summary.json` from the scorer output directory, complete the template, review it, and send it yourself.
+
+Include the model and revision, interface, language, strict micro-success, scored and expected case counts, dataset revision, EdgeBench commit, and per-family scores when available. Report partial coverage as partial; a subset score is not a full benchmark result. For reproducibility, include the generation settings and AIR review status described above.
 
 ## License
 
