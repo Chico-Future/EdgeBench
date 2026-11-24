@@ -837,6 +837,56 @@ a:focus-visible, button:focus-visible { outline-color: var(--signal); }
 
 .results .section-head { margin-bottom: 30px; }
 .results .section-head p { max-width: 560px; color: #a9a3ab; font-size: 15px; }
+.rebuttal-update {
+  margin: 0 0 16px;
+  padding: 17px 19px 15px;
+  border: 1px solid #332d38;
+  border-radius: 16px;
+  background:
+    radial-gradient(620px 180px at 100% 0%, rgba(185, 168, 196, .13), transparent 74%),
+    #121113;
+}
+.rebuttal-update-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #aba1b0;
+  font-family: "DM Mono", monospace;
+  font-size: 10px;
+  letter-spacing: .11em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+.rebuttal-update-head span:last-child { color: #77717a; letter-spacing: .06em; text-align: right; }
+.rebuttal-update-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(145px, .65fr) minmax(145px, .65fr);
+  gap: 14px;
+  align-items: stretch;
+  margin-top: 14px;
+}
+.rebuttal-update-copy { min-width: 0; padding-right: 14px; }
+.rebuttal-update-copy h3 { margin: 0 0 7px; color: #eee9f0; font-size: 17px; letter-spacing: -.4px; line-height: 1.25; }
+.rebuttal-update-copy p { max-width: 630px; margin: 0; color: #b4adb7; font-size: 13px; line-height: 1.55; }
+.rebuttal-stat {
+  display: flex;
+  min-height: 80px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 11px 13px;
+  border-left: 1px solid #2d2830;
+}
+.rebuttal-stat span, .rebuttal-stat small { color: #89818d; font-size: 10px; line-height: 1.35; }
+.rebuttal-stat strong { margin: 5px 0 2px; color: #f1ecf2; font-family: "DM Mono", monospace; font-size: 21px; font-weight: 500; letter-spacing: -.7px; }
+.rebuttal-update-note { max-width: 880px; margin: 14px 0 0; padding-top: 11px; border-top: 1px solid #28232b; color: #817a84; font-size: 11px; line-height: 1.5; }
+@media (max-width: 760px) {
+  .rebuttal-update-head { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .rebuttal-update-head span:last-child { text-align: left; }
+  .rebuttal-update-grid { grid-template-columns: 1fr 1fr; }
+  .rebuttal-update-copy { grid-column: 1 / -1; padding-right: 0; }
+  .rebuttal-stat { border-top: 1px solid #2d2830; border-left: 0; }
+}
 .trend-panel, .model-landscape, .analysis-panel, .results-table-wrap {
   border: 1px solid #27232a;
   border-radius: 18px;

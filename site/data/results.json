@@ -395,5 +395,29 @@
       "Chinese": 78.5,
       "English": 54.3
     }
+  },
+  "rebuttal_results": {
+    "source": "EdgeBench-Home revised ICLR manuscript and rebuttal verification notes",
+    "rk3588_qwen3_17_state_seeking": {
+      "model": "Qwen3-1.7B-16K",
+      "platform": "RK3588",
+      "chinese": { "successes": 23, "cases": 420, "rate": 5.5 },
+      "english": { "successes": 4, "cases": 420, "rate": 1.0 },
+      "bilingual": { "successes": 27, "cases": 840, "rate": 3.2 }
+    },
+    "state_seeking_floor_contrast": {
+      "reference_configurations": 4,
+      "server_far_mean": 43.8,
+      "server_req_mean": 40.2,
+      "tested_local_far": 0.0,
+      "tested_local_req": 0.0
+    },
+    "case_count": 840,
+    "languages": 2,
+    "cases_per_language": 420,
+    "task_families": 7,
+    "cases_per_family_per_language": 60,
+    "expert_review": "All 840 final cases were individually reviewed for bilingual wording, relative difficulty, and duplicate or near-duplicate cases.",
+    "limitations": "The FAR/REQ local zero scores are a floor effect and do not identify failure causes. The RK3588 comparison measures task capability, not latency, memory, or energy. Case review does not establish statistical representativeness or validate the AIR judge. P0 episode-level logs are unavailable locally for independent bilingual reproduction."
   }
 }

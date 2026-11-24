@@ -12,6 +12,7 @@ const gapTooltip = document.getElementById('gap-tooltip');
 const gapFilterButtons = document.querySelectorAll('.gap-filter');
 let loadedModels = [];
 let loadedBandSummary = [];
+let loadedResults = null;
 let landscapeMetric = 'sg';
 let gapFilter = 'all';
 let locale = localStorage.getItem('edgebench-locale') === 'zh' ? 'zh' : 'en';
@@ -38,6 +39,14 @@ const copy = {
     taskTitles: ['Device Grounding and Control', 'Multi-device Selection and Control', 'Ambiguity and Intent Resolution', 'Future Automation Registration', 'Dialogue-context Resolution', 'Personalized Memory Use', 'Read-only Environment Queries'],
     baseline: 'Baseline', sourceData: 'Source data ↗', interfaceFlow: ['Request + state', 'Model', 'Request', 'Query + state'],
     bandConfigs: ['7 configurations', '9 configurations', '2 configurations'], bandGap: 'interface gap',
+    rebuttal: {
+      label: 'REBUTTAL UPDATE · REVISED RESULTS', source: 'ICLR 2027 · revised accounting',
+      heading: 'The corrected accounting is now the source of truth.',
+      copy: 'Qwen3-1.7B-16K on RK3588 records 23/420 Chinese (5.5%) and 4/420 English (1.0%) under State-Seeking, totaling 27/840 (3.2%).',
+      qwenLabel: 'Qwen3-1.7B-16K · RK3588 · SS', qwenCaption: 'bilingual strict success',
+      serverLabel: 'Server reference · SS', serverCaption: 'FAR / REQ mean',
+      note: 'Across the same State-Seeking families, all 18 tested local configurations score 0% on FAR and REQ. This floor effect does not rank local models or identify their failure causes. All 840 cases received expert review; aligned RK3588 latency, memory, and energy were not measured.'
+    },
     chartLegend: ['State-Given', 'State-Seeking'], languageLegend: ['Chinese', 'English'],
     scene: { localTime: 'Local time', simulatedTime: 'Simulated time', schedule: 'Schedule', preference: 'Preference', snapshot: 'Snapshot', weekday: 'Every weekday · 7:00 AM', evening: 'Evening', now: 'Right now', occupied: 'Occupied', empty: 'Empty', available: 'Available', inspect: 'Inspect', reset: 'Reset 3D scene view', sceneLabel: 'Interactive 3D home scene. The camera follows the current task. Select a device to inspect; use arrow keys to rotate and plus or minus to zoom.' },
     steps: {
@@ -72,6 +81,14 @@ const copy = {
     taskTitles: ['设备定位与控制', '多设备选择与控制', '歧义与意图理解', '未来自动化设置', '对话上下文理解', '个性化记忆使用', '只读环境查询'],
     baseline: '基线', sourceData: '源数据 ↗', interfaceFlow: ['请求 + 状态', '模型', '请求', '查询 + 状态'],
     bandConfigs: ['7 个配置', '9 个配置', '2 个配置'], bandGap: '接口差值',
+    rebuttal: {
+      label: 'REBUTTAL 更新 · 修订结果', source: 'ICLR 2027 · 修订后的统计口径',
+      heading: '修订后的统计口径已作为当前结果来源。',
+      copy: 'Qwen3-1.7B-16K 在 RK3588 上的 State-Seeking 成功数为中文 23/420（5.5%）、英文 4/420（1.0%），双语合计 27/840（3.2%）。',
+      qwenLabel: 'Qwen3-1.7B-16K · RK3588 · 查询状态', qwenCaption: '双语严格成功',
+      serverLabel: 'Server 参考组 · 查询状态', serverCaption: 'FAR / REQ 平均值',
+      note: '在相同的 State-Seeking 任务中，受测的 18 个本地配置在 FAR 和 REQ 上均为 0%。这是地板效应，无法区分本地模型，也不能确定失败原因。840 条案例均经过专家核查；没有测量对齐的 RK3588 延迟、内存和能耗。'
+    },
     chartLegend: ['已知状态', '查询状态'], languageLegend: ['中文', 'English'],
     scene: { localTime: '本地时间', simulatedTime: '模拟时间', schedule: '日程', preference: '偏好', snapshot: '当前状态', weekday: '每个工作日 · 早上 7:00', evening: '晚间', now: '此刻', occupied: '有人', empty: '无人', available: '可用', inspect: '查看', reset: '重置 3D 视角', sceneLabel: '可交互的 3D 家庭场景。镜头会跟随当前任务。选择设备可查看状态；使用方向键旋转，使用加减键缩放。' },
     steps: {
@@ -242,6 +259,26 @@ function renderBandOverview(summary) {
   });
 }
 
+function renderRebuttal(data = loadedResults) {
+  const update = data?.rebuttal_results;
+  const t = copy[locale].rebuttal;
+  if (!update) return;
+  const qwen = update.rk3588_qwen3_17_state_seeking;
+  const contrast = update.state_seeking_floor_contrast;
+  const text = (selector, value) => { const node = document.querySelector(selector); if (node) node.textContent = value; };
+  text('#rebuttal-update-label', t.label);
+  text('#rebuttal-update-source', t.source);
+  text('#rebuttal-update-title', t.heading);
+  text('#rebuttal-update-copy', t.copy);
+  text('#rebuttal-qwen-label', t.qwenLabel);
+  text('#rebuttal-qwen-value', `${qwen.bilingual.successes} / ${qwen.bilingual.cases}`);
+  text('#rebuttal-qwen-caption', t.qwenCaption);
+  text('#rebuttal-server-label', t.serverLabel);
+  text('#rebuttal-server-value', `${Number(contrast.server_far_mean).toFixed(1)}% / ${Number(contrast.server_req_mean).toFixed(1)}%`);
+  text('#rebuttal-server-caption', t.serverCaption);
+  text('#rebuttal-update-note', t.note);
+}
+
 function render(models, filter = 'all') {
   const filtered = sortModels(models).filter((model) => {
     if (filter === 'all') return true;
@@ -341,6 +378,7 @@ function applyLocale(nextLocale) {
   document.querySelectorAll('.brand[aria-label]').forEach((node) => node.setAttribute('aria-label', locale === 'zh' ? 'EdgeBench 套件首页' : 'EdgeBench suite home'));
   document.title = locale === 'zh' ? 'EdgeBench-Home — EdgeBench' : 'EdgeBench-Home — EdgeBench';
   if (loadedModels.length) { render(loadedModels, document.querySelector('.filter.active')?.dataset.filter || 'all'); renderLandscape(loadedModels, landscapeMetric); renderLanguageChart(loadedBandSummary); renderGapChart(loadedModels, gapFilter); }
+  renderRebuttal();
   activeStep = Math.min(activeStep, currentTaskSteps().length - 1);
   conversationFamily = '';
   updateTaskStep();
@@ -572,6 +610,7 @@ fetch('../data/results.json')
   })
   .then((data) => {
     const models = data.models || [];
+    loadedResults = data;
     loadedModels = models;
     loadedBandSummary = summarizeSizeBands(models);
     renderBandOverview(loadedBandSummary);
@@ -579,6 +618,7 @@ fetch('../data/results.json')
     renderLandscape(models);
     renderLanguageChart(loadedBandSummary);
     renderGapChart(models);
+    renderRebuttal(data);
     filterButtons.forEach((button) => {
       button.addEventListener('click', () => {
         filterButtons.forEach((item) => item.classList.remove('active'));
