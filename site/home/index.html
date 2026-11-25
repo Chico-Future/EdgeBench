@@ -14,7 +14,7 @@
       window.addEventListener('pageshow', () => window.scrollTo(0, 0), { once: true });
     }
   </script>
-  <link rel="stylesheet" href="../style.css?v=83">
+  <link rel="stylesheet" href="../style.css?v=86">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -68,7 +68,7 @@
           <div class="auto-status"><span id="walk-counter" aria-live="polite">STEP 01 / 03</span></div>
         </div>
         <div class="demo-body">
-          <div class="scene-canvas">
+          <div class="task-conversation-card">
             <div class="scene-timebar" role="group" aria-label="Home time context">
               <div class="scene-time-block">
                 <span class="scene-time-label" id="scene-clock-label">Local time</span>
@@ -79,7 +79,6 @@
                 <strong id="scene-time-value"></strong>
               </div>
             </div>
-            <div id="scene-items" class="scene-items" aria-label="Interactive 3D smart-home scene"></div>
             <aside class="agent-conversation" data-live-stage="understand" aria-label="Conversation walkthrough">
               <div class="conversation-thread" id="conversation-thread" role="log" aria-live="polite" aria-relevant="additions text"></div>
             </aside>
@@ -116,7 +115,6 @@ python3 -m cloud.run_state_seeking --help
 python3 -m scoring.unified_scorer --help</code></pre></div></section>
 </main>
 <footer><div><a class="brand" href="../" aria-label="EdgeBench suite home"><img class="brand-mark" src="../assets/edgebench-mark.svg" alt=""><span>EdgeBench</span></a></div><nav><a href="https://huggingface.co/datasets/chico-research/EdgeBench-Home">Dataset</a><a href="https://github.com/Chico-Future/EdgeBench">GitHub</a><a href="https://github.com/Chico-Future/EdgeBench/blob/main/LICENSE">Apache-2.0</a></nav></footer>
-<script src="../task-scene-3d.js?v=27"></script>
-<script src="../app.js?v=63"></script>
+<script src="../app.js?v=65"></script>
 </body>
 </html>

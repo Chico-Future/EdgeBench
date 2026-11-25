@@ -354,7 +354,6 @@ function applyLocale(nextLocale) {
   document.querySelector('.task-list')?.setAttribute('aria-label', locale === 'zh' ? '选择任务类别' : 'Choose a task family');
   document.querySelector('.scene-timebar')?.setAttribute('aria-label', locale === 'zh' ? '家庭时间信息' : 'Home time context');
   document.querySelector('.agent-conversation')?.setAttribute('aria-label', locale === 'zh' ? '对话过程' : 'Conversation walkthrough');
-  document.querySelector('#scene-items')?.setAttribute('aria-label', t.scene.sceneLabel);
   const sceneFallback = document.querySelector('.scene-fallback');
   if (sceneFallback) sceneFallback.textContent = locale === 'zh' ? '当前浏览器无法启动交互式 3D 场景，请启用 WebGL 后重试。' : 'This browser could not start the interactive 3D scene. Enable WebGL to explore the room.';
   setText('#submit-results > .section-label', t.submit);
@@ -703,130 +702,9 @@ const taskData = {
   }
 };
 
-const taskRooms = {
-  DGC: ['workspace'],
-  MSC: ['living', 'bedroom'],
-  AIR: ['living', 'bedroom'],
-  FAR: ['kitchen'],
-  DCR: ['bedroom'],
-  PMU: ['living'],
-  REQ: ['living', 'kitchen']
-};
-
-const sceneRoomCatalog = {
-  workspace: {
-    label: 'Workspace',
-    devices: [{ id: 'desk', label: 'Desk lamp', type: 'lamp' }]
-  },
-  living: {
-    label: 'Living room',
-    devices: [
-      { id: 'living', label: 'Floor lamp', type: 'lamp' },
-      { id: 'fan', label: 'Pedestal fan', type: 'fan' }
-    ]
-  },
-  bedroom: {
-    label: 'Bedroom',
-    devices: [
-      { id: 'bedside', label: 'Bedside lamp', type: 'lamp' },
-      { id: 'bedroom-fan', label: 'Ceiling fan', type: 'fan' }
-    ]
-  },
-  kitchen: {
-    label: 'Kitchen',
-    devices: [{ id: 'kitchen', label: 'Pendant light', type: 'lamp' }]
-  }
-};
-
-function sceneState(family, step) {
-  const state = { on: new Set(), targets: new Set(), inspected: new Set(), unchanged: new Set() };
-  if (family === 'DGC') {
-    if (step >= 0) state.targets.add('desk');
-    if (step >= 1) state.on.add('desk');
-  } else if (family === 'MSC') {
-    if (step >= 0) {
-      state.targets.add('living');
-    }
-    if (step >= 1) state.on.add('living');
-    if (step >= 2) {
-      state.unchanged.add('bedside');
-      state.unchanged.add('fan');
-      state.unchanged.add('bedroom-fan');
-    }
-  } else if (family === 'AIR') {
-    if (step === 1) state.targets.add('living');
-    if (step >= 2) {
-      state.targets.add('living');
-      state.on.add('living');
-    }
-  } else if (family === 'FAR') {
-    if (step >= 1) state.targets.add('kitchen');
-    if (step >= 2) state.on.add('kitchen');
-  } else if (family === 'DCR') {
-    if (step >= 1) state.targets.add('bedside');
-    if (step > 1) state.on.add('bedside');
-  } else if (family === 'PMU') {
-    if (step >= 1) state.targets.add('living');
-    if (step > 1) state.on.add('living');
-  } else if (family === 'REQ') {
-    state.on.add('living');
-    state.on.add('kitchen');
-    if (step >= 1) {
-      state.inspected.add('living');
-      state.inspected.add('kitchen');
-    }
-  }
-  return state;
-}
-
-function devicePresentation(family, step, device, state) {
-  const labels = { possible: locale === 'zh' ? '待确认' : 'Possible', warm: locale === 'zh' ? '暖光 · 40%' : 'Warm · 40%', unchanged: locale === 'zh' ? '保持原样' : 'Unchanged', schedule: locale === 'zh' ? '每个工作日 · 7:00' : 'Weekdays · 7:00', onAtSeven: locale === 'zh' ? '已开启 · 早上 7:00' : 'On · 7:00 AM', readOn: locale === 'zh' ? '已读取 · 开启' : 'Read · on', on: locale === 'zh' ? '已开启' : 'On', target: locale === 'zh' ? '目标设备' : 'Target' };
-  if (family === 'AIR' && step === 0 && ['living', 'bedside'].includes(device.id)) {
-    return { kind: 'candidate', status: labels.possible };
-  }
-  if (family === 'AIR' && device.id === 'living' && step === 2) {
-    return { kind: 'warm', status: labels.warm };
-  }
-  if (family === 'MSC' && step === 2 && state.unchanged.has(device.id)) return { kind: 'unchanged', status: labels.unchanged };
-  if (family === 'FAR' && device.id === 'kitchen') {
-    if (step === 1) return { kind: 'scheduled', status: labels.schedule };
-    if (step === 2) return { kind: 'on', status: labels.onAtSeven };
-  }
-  if (family === 'PMU' && device.id === 'living' && step === 2) {
-    return { kind: 'warm', status: labels.warm };
-  }
-  if (state.on.has(device.id)) {
-    return { kind: state.inspected.has(device.id) ? 'inspected' : 'on', status: state.inspected.has(device.id) ? labels.readOn : labels.on };
-  }
-  if (state.targets.has(device.id)) return { kind: 'target', status: labels.target };
-  return null;
-}
-
-function renderHomeScene(family, step) {
-  const task = taskData[family];
-  const currentStep = copy[locale].steps[family][Math.max(0, step)];
-  const state = sceneState(family, step);
-  const roomCopy = copy[locale].rooms;
-  const rooms = taskRooms[family].map((id) => ({
-    id,
-    ...sceneRoomCatalog[id],
-    label: roomCopy[sceneRoomCatalog[id].label],
-    occupied: family === 'MSC' ? id === 'living' : null,
-    occupancyText: { occupied: copy[locale].scene.occupied, empty: copy[locale].scene.empty },
-    devices: sceneRoomCatalog[id].devices.map((device) => ({
-      ...device,
-      label: roomCopy[device.label],
-      presentation: devicePresentation(family, step, device, state)
-    }))
-  }));
-  taskScene3d?.update({ family, title: copy[locale].taskTitles[Object.keys(taskData).indexOf(family)], step, stepTitle: currentStep[0], stepCopy: currentStep[1], rooms, state, locale, scene: copy[locale].scene });
-}
-
 const taskRows = document.querySelectorAll('.task-row');
 const taskDemo = document.querySelector('.task-demo');
 const taskTitle = document.getElementById('task-demo-title');
-const sceneItems = document.getElementById('scene-items');
-const taskScene3d = window.EdgeBenchTaskScene3D?.mount(sceneItems);
 const walkCounter = document.getElementById('walk-counter');
 const agentConversation = document.querySelector('.agent-conversation');
 const conversationThread = document.getElementById('conversation-thread');
@@ -834,7 +712,6 @@ let activeFamily = 'DGC';
 let activeStep = 0;
 let walkTimer;
 let agentTimers = [];
-let deviceReplyTimer;
 let conversationFamily = '';
 let airReplyAdded = false;
 let dcrCorrectionAdded = false;
@@ -967,41 +844,8 @@ function setConversationReply(message) {
   else assistantReply = appendConversationMessage('assistant', message);
 }
 
-function deviceStatusReply({ label, presentation }) {
-  const kind = presentation?.kind;
-  if (locale === 'zh') {
-    if (!kind) return `我还没有查看${label}的状态。`;
-    if (kind === 'target') return `${label}就是你要打开的设备。`;
-    if (kind === 'candidate') return `这个可能符合你的描述。你指的是哪个房间？`;
-    if (kind === 'warm') return `${label}已设为 40% 暖光。`;
-    if (kind === 'scheduled') return `${label}会在每个工作日早上 7:00 打开。`;
-    if (kind === 'unchanged') return `${label}保持原样，没有更改。`;
-    if (kind === 'inspected') return `${label}目前已开启，我没有更改它。`;
-    if (kind === 'on') return `${label}目前已开启。`;
-    return `${label}目前已关闭。`;
-  }
-  if (!kind) return `I haven’t checked the ${label.toLowerCase()} yet.`;
-  if (kind === 'target') return `The ${label.toLowerCase()} is the one you asked me to turn on.`;
-  if (kind === 'candidate') return `That could be a match. Which room did you mean?`;
-  if (kind === 'warm') return `The ${label.toLowerCase()} is set to warm at 40%.`;
-  if (kind === 'scheduled') return `The ${label.toLowerCase()} will turn on at 7:00 AM every weekday.`;
-  if (kind === 'unchanged') return `The ${label.toLowerCase()} hasn’t changed.`;
-  if (kind === 'inspected') return `The ${label.toLowerCase()} is on. I haven’t changed anything.`;
-  if (kind === 'on') return `The ${label.toLowerCase()} is on.`;
-  return `The ${label.toLowerCase()} is off.`;
-}
-
-taskScene3d?.setSelectionHandler?.((device) => {
-  appendConversationMessage('user', `What’s the status of the ${device.label.toLowerCase()}?`);
-  window.clearTimeout(deviceReplyTimer);
-  deviceReplyTimer = window.setTimeout(() => {
-    appendConversationMessage('assistant', deviceStatusReply(device));
-  }, motionPreference.matches ? 0 : 180);
-});
-
 function updateConversation() {
   if (conversationFamily !== activeFamily) {
-    window.clearTimeout(deviceReplyTimer);
     conversationThread.replaceChildren();
     conversationFamily = activeFamily;
     assistantReply = null;
@@ -1015,25 +859,20 @@ function updateConversation() {
 function setAgentStage(stage) {
   agentConversation.dataset.liveStage = stage;
   if (stage === 'understand') {
-    if (activeStep === 0) taskScene3d?.setPhase?.(stage);
     return;
   }
   const reply = conversationData[activeFamily];
   if (activeStep === 0 && stage === 'ground') {
-    renderHomeScene(activeFamily, 0);
     if (activeFamily === 'AIR') setConversationReply(reply.clarification);
   } else if (activeStep === 1 && stage === 'act') {
-    renderHomeScene(activeFamily, 1);
     if (activeFamily === 'DCR' && !dcrCorrectionAdded) {
       appendConversationMessage('user', reply.correction);
       dcrCorrectionAdded = true;
     }
     if (activeFamily !== 'FAR' && activeFamily !== 'DCR') setConversationReply(reply.completion);
   } else if (activeStep === 2 && stage === 'confirm') {
-    renderHomeScene(activeFamily, 2);
     setConversationReply(reply.completion);
   }
-  taskScene3d?.setPhase?.(stage);
 }
 
 function playAgentFlow() {
@@ -1057,7 +896,6 @@ function updateTaskStep() {
   updateFamilyIndicator();
   updateSceneTime();
   const visibleStep = activeStep === 0 ? -1 : activeStep - 1;
-  renderHomeScene(activeFamily, visibleStep);
   walkCounter.textContent = `${locale === 'zh' ? '步骤' : 'STEP'} ${String(activeStep + 1).padStart(2, '0')} / ${String(steps.length).padStart(2, '0')}`;
   updateConversation();
   if (activeFamily === 'AIR' && activeStep === 1 && !airReplyAdded) {
@@ -1113,7 +951,7 @@ const handleMotionPreference = () => {
 if (motionPreference.addEventListener) motionPreference.addEventListener('change', handleMotionPreference);
 else motionPreference.addListener(handleMotionPreference);
 
-// Locale initialization also paints the task scene and starts its walkthrough.
+// Locale initialization updates the task walkthrough and starts its dialogue.
 applyLocale(locale);
 
 landscapeMetricButtons.forEach((button) => {
