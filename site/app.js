@@ -39,9 +39,9 @@ const copy = {
     taskTitles: ['Device Grounding and Control', 'Multi-device Selection and Control', 'Ambiguity and Intent Resolution', 'Future Automation Registration', 'Dialogue-context Resolution', 'Personalized Memory Use', 'Read-only Environment Queries'],
     baseline: 'Baseline', sourceData: 'Source data ↗', interfaceFlow: ['Request + state', 'Model', 'Request', 'Query + state'],
     bandConfigs: ['7 configurations', '9 configurations', '2 configurations'], bandGap: 'interface gap',
-    rebuttal: {
-      label: 'REBUTTAL UPDATE · REVISED RESULTS', source: 'ICLR 2027 · revised accounting',
-      heading: 'The corrected accounting is now the source of truth.',
+    highlights: {
+      label: 'EVALUATION HIGHLIGHTS', source: 'EdgeBench-Home · State-Seeking',
+      heading: 'How local models perform when they gather information.',
       copy: 'Qwen3-1.7B-16K on RK3588 records 23/420 Chinese (5.5%) and 4/420 English (1.0%) under State-Seeking, totaling 27/840 (3.2%).',
       qwenLabel: 'Qwen3-1.7B-16K · RK3588 · SS', qwenCaption: 'bilingual strict success',
       serverLabel: 'Server reference · SS', serverCaption: 'FAR / REQ mean',
@@ -81,9 +81,9 @@ const copy = {
     taskTitles: ['设备定位与控制', '多设备选择与控制', '歧义与意图理解', '未来自动化设置', '对话上下文理解', '个性化记忆使用', '只读环境查询'],
     baseline: '基线', sourceData: '源数据 ↗', interfaceFlow: ['请求 + 状态', '模型', '请求', '查询 + 状态'],
     bandConfigs: ['7 个配置', '9 个配置', '2 个配置'], bandGap: '接口差值',
-    rebuttal: {
-      label: 'REBUTTAL 更新 · 修订结果', source: 'ICLR 2027 · 修订后的统计口径',
-      heading: '修订后的统计口径已作为当前结果来源。',
+    highlights: {
+      label: '评测结果', source: 'EdgeBench-Home · 查询状态',
+      heading: '模型主动查询信息时的表现。',
       copy: 'Qwen3-1.7B-16K 在 RK3588 上的 State-Seeking 成功数为中文 23/420（5.5%）、英文 4/420（1.0%），双语合计 27/840（3.2%）。',
       qwenLabel: 'Qwen3-1.7B-16K · RK3588 · 查询状态', qwenCaption: '双语严格成功',
       serverLabel: 'Server 参考组 · 查询状态', serverCaption: 'FAR / REQ 平均值',
@@ -259,24 +259,24 @@ function renderBandOverview(summary) {
   });
 }
 
-function renderRebuttal(data = loadedResults) {
-  const update = data?.rebuttal_results;
-  const t = copy[locale].rebuttal;
+function renderHighlights(data = loadedResults) {
+  const update = data?.featured_results;
+  const t = copy[locale].highlights;
   if (!update) return;
   const qwen = update.rk3588_qwen3_17_state_seeking;
   const contrast = update.state_seeking_floor_contrast;
   const text = (selector, value) => { const node = document.querySelector(selector); if (node) node.textContent = value; };
-  text('#rebuttal-update-label', t.label);
-  text('#rebuttal-update-source', t.source);
-  text('#rebuttal-update-title', t.heading);
-  text('#rebuttal-update-copy', t.copy);
-  text('#rebuttal-qwen-label', t.qwenLabel);
-  text('#rebuttal-qwen-value', `${qwen.bilingual.successes} / ${qwen.bilingual.cases}`);
-  text('#rebuttal-qwen-caption', t.qwenCaption);
-  text('#rebuttal-server-label', t.serverLabel);
-  text('#rebuttal-server-value', `${Number(contrast.server_far_mean).toFixed(1)}% / ${Number(contrast.server_req_mean).toFixed(1)}%`);
-  text('#rebuttal-server-caption', t.serverCaption);
-  text('#rebuttal-update-note', t.note);
+  text('#result-highlight-label', t.label);
+  text('#result-highlight-source', t.source);
+  text('#result-highlight-title', t.heading);
+  text('#result-highlight-copy', t.copy);
+  text('#result-qwen-label', t.qwenLabel);
+  text('#result-qwen-value', `${qwen.bilingual.successes} / ${qwen.bilingual.cases}`);
+  text('#result-qwen-caption', t.qwenCaption);
+  text('#result-server-label', t.serverLabel);
+  text('#result-server-value', `${Number(contrast.server_far_mean).toFixed(1)}% / ${Number(contrast.server_req_mean).toFixed(1)}%`);
+  text('#result-server-caption', t.serverCaption);
+  text('#result-highlight-note', t.note);
 }
 
 function render(models, filter = 'all') {
@@ -378,7 +378,7 @@ function applyLocale(nextLocale) {
   document.querySelectorAll('.brand[aria-label]').forEach((node) => node.setAttribute('aria-label', locale === 'zh' ? 'EdgeBench 套件首页' : 'EdgeBench suite home'));
   document.title = locale === 'zh' ? 'EdgeBench-Home — EdgeBench' : 'EdgeBench-Home — EdgeBench';
   if (loadedModels.length) { render(loadedModels, document.querySelector('.filter.active')?.dataset.filter || 'all'); renderLandscape(loadedModels, landscapeMetric); renderLanguageChart(loadedBandSummary); renderGapChart(loadedModels, gapFilter); }
-  renderRebuttal();
+  renderHighlights();
   activeStep = Math.min(activeStep, currentTaskSteps().length - 1);
   conversationFamily = '';
   updateTaskStep();
@@ -618,7 +618,7 @@ fetch('../data/results.json')
     renderLandscape(models);
     renderLanguageChart(loadedBandSummary);
     renderGapChart(models);
-    renderRebuttal(data);
+    renderHighlights(data);
     filterButtons.forEach((button) => {
       button.addEventListener('click', () => {
         filterButtons.forEach((item) => item.classList.remove('active'));

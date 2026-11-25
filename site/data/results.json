@@ -396,8 +396,8 @@
       "English": 54.3
     }
   },
-  "rebuttal_results": {
-    "source": "EdgeBench-Home revised ICLR manuscript and rebuttal verification notes",
+  "featured_results": {
+    "source": "EdgeBench-Home EdgeBench-Home bilingual evaluation summary",
     "rk3588_qwen3_17_state_seeking": {
       "model": "Qwen3-1.7B-16K",
       "platform": "RK3588",

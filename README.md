@@ -31,7 +31,7 @@ The repository contains the public runner and scorer. Dataset records, model wei
 
 ## Revised result accounting
 
-The EdgeBench-Home results page follows the revised ICLR/rebuttal accounting: 840 bilingual cases (420 Chinese and 420 English), seven task families with 60 cases per family and language, and 22 evaluated configurations (18 local plus four Server/API references).
+The EdgeBench-Home results page follows the published bilingual evaluation results: 840 bilingual cases (420 Chinese and 420 English), seven task families with 60 cases per family and language, and 22 evaluated configurations (18 local plus four Server/API references).
 
 The RK3588 State-Seeking result for **Qwen3-1.7B-16K** is 23/420 Chinese (5.5%), 4/420 English (1.0%), and 27/840 bilingual (3.2%). Under the same State-Seeking task families, the four-configuration Server reference group averages 43.8% on FAR and 40.2% on REQ, while the tested local configurations score 0% on both. These values support separation among the evaluated configurations; they do not by themselves validate every case or identify local failure causes.
 
