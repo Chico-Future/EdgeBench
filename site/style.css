@@ -1914,3 +1914,38 @@ body:not(.suite-page) .gap-model-label { font-size: 12px; }
   body:not(.suite-page) .scene-time-block time,
   body:not(.suite-page) .scene-time-block strong { font-size: 13px; }
 }
+
+/* Benchmark-first rhythm: compact the walkthrough and keep cards quiet. */
+body:not(.suite-page) .intro { min-height: clamp(310px, 32vw, 390px); }
+body:not(.suite-page) .facts > div,
+body:not(.suite-page) .facts > div:last-child { min-height: 68px; }
+body:not(.suite-page) .section { padding-block: 62px; }
+body:not(.suite-page) .tasks { padding-top: 70px; padding-bottom: 72px; }
+body:not(.suite-page) .tasks-heading h2 { max-width: 540px; font-size: clamp(34px, 4vw, 48px); line-height: 1.05; }
+body:not(.suite-page) .task-row { min-height: 68px; padding-inline: 10px; }
+body:not(.suite-page) .task-name { font-size: 13px; }
+body:not(.suite-page) .task-demo,
+body:not(.suite-page) .interface-card,
+body:not(.suite-page) .result-highlight,
+body:not(.suite-page) .trend-panel,
+body:not(.suite-page) .model-landscape,
+body:not(.suite-page) .analysis-panel,
+body:not(.suite-page) .results-table-wrap,
+body:not(.suite-page) .band-card,
+body:not(.suite-page) .direct-submit-card { border-radius: 9px; box-shadow: none; }
+body:not(.suite-page) .task-conversation-card { min-height: 0; padding: 16px 24px 20px; background: #f7f6f2; }
+body:not(.suite-page) .agent-conversation { padding-top: 14px; }
+body:not(.suite-page) .conversation-thread { min-height: 0; padding: 4px 0; }
+body:not(.suite-page) .conversation-message p,
+body:not(.suite-page) .conversation-message.user p { padding: 10px 14px; border-radius: 9px 9px 9px 3px; box-shadow: none; }
+body:not(.suite-page) .conversation-message.user p { border-radius: 9px 9px 3px 9px; }
+body:not(.suite-page) .scene-timebar { border-radius: 7px; }
+body:not(.suite-page) .interface-card { border-radius: 9px; }
+@media (max-width: 760px) {
+  body:not(.suite-page) .intro { min-height: 340px; }
+  body:not(.suite-page) .section { padding-block: 50px; }
+  body:not(.suite-page) .tasks { padding-top: 56px; padding-bottom: 58px; }
+  body:not(.suite-page) .task-row,
+  body:not(.suite-page) .task-row:first-child { border-radius: 8px; }
+  body:not(.suite-page) .task-conversation-card { padding: 14px; }
+}
