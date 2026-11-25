@@ -721,6 +721,14 @@ const sceneClockLabel = document.getElementById('scene-clock-label');
 const sceneTimeContext = document.getElementById('scene-time-context');
 const sceneTimeLabel = document.getElementById('scene-time-label');
 const sceneTimeValue = document.getElementById('scene-time-value');
+const taskVideo = document.getElementById('task-video');
+const taskVideoSources = {
+  DGC: '../assets/dgc-workspace.mp4', MSC: '../assets/msc-multi-device.mp4',
+  AIR: '../assets/air-clarification.mp4', FAR: '../assets/far-summer.mp4',
+  DCR: '../assets/dcr-context.mp4', PMU: '../assets/pmu-personalized-memory.mp4',
+  REQ: '../assets/req-read-only.mp4'
+};
+let taskVideoFamily = '';
 const timeContextByFamily = {
   FAR: { label: 'schedule', value: 'weekday' },
   PMU: { label: 'preference', value: 'evening' },
@@ -762,6 +770,32 @@ function updateFamilyIndicator() {
     row.classList.toggle('selected', selected);
     row.setAttribute('aria-pressed', String(selected));
   });
+}
+
+function syncTaskVideo() {
+  if (!taskVideo) return;
+  const source = taskVideoSources[activeFamily];
+  const nextSource = new URL(source, document.baseURI).href;
+  const familyChanged = taskVideoFamily !== activeFamily;
+  if (taskVideo.src !== nextSource) {
+    taskVideoFamily = activeFamily;
+    taskVideo.src = source;
+    taskVideo.load();
+    taskVideo.addEventListener('loadedmetadata', () => {
+      if (taskVideoFamily !== activeFamily || !Number.isFinite(taskVideo.duration)) return;
+      taskVideo.currentTime = Math.min(taskVideo.duration - 0.05, taskVideo.duration * activeStep / currentTaskSteps().length);
+      if (!motionPreference.matches) taskVideo.play().catch(() => {});
+    }, { once: true });
+  } else if (familyChanged) {
+    taskVideo.currentTime = 0;
+    if (!motionPreference.matches) taskVideo.play().catch(() => {});
+  }
+  if (!familyChanged && taskVideo.readyState >= HTMLMediaElement.HAVE_METADATA && Number.isFinite(taskVideo.duration)) {
+    const targetTime = Math.min(taskVideo.duration - 0.05, taskVideo.duration * activeStep / currentTaskSteps().length);
+    if (Math.abs(taskVideo.currentTime - targetTime) > 0.75) taskVideo.currentTime = targetTime;
+  }
+  if (motionPreference.matches) taskVideo.pause();
+  else taskVideo.play().catch(() => {});
 }
 
 const conversationData = {
@@ -895,6 +929,7 @@ function updateTaskStep() {
   taskTitle.textContent = copy[locale].taskTitles[Object.keys(taskData).indexOf(activeFamily)];
   updateFamilyIndicator();
   updateSceneTime();
+  syncTaskVideo();
   const visibleStep = activeStep === 0 ? -1 : activeStep - 1;
   walkCounter.textContent = `${locale === 'zh' ? '步骤' : 'STEP'} ${String(activeStep + 1).padStart(2, '0')} / ${String(steps.length).padStart(2, '0')}`;
   updateConversation();
@@ -947,6 +982,7 @@ document.addEventListener('visibilitychange', startWalk);
 const handleMotionPreference = () => {
   startWalk();
   playAgentFlow();
+  syncTaskVideo();
 };
 if (motionPreference.addEventListener) motionPreference.addEventListener('change', handleMotionPreference);
 else motionPreference.addListener(handleMotionPreference);
